@@ -9,7 +9,6 @@ interface GaugeProps {
 }
 
 const MAX_VALUE = 10; // L/min
-const TICKS = 11; // 0 to 10
 
 export function Gauge({ value }: GaugeProps) {
   const percentage = Math.min(Math.max(value / MAX_VALUE, 0), 1);
@@ -38,32 +37,6 @@ export function Gauge({ value }: GaugeProps) {
 
          {/* Inner Mask */}
         <div className="absolute top-[10%] left-[10%] w-[80%] h-[160%] rounded-full bg-card" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 50%, 0 50%)' }}></div>
-      
-        {/* Ticks */}
-        <div className="absolute top-0 left-0 w-full h-full">
-          {Array.from({ length: TICKS }).map((_, i) => {
-             const tickRotation = (i / (TICKS - 1)) * 180 - 90;
-             const isMajorTick = i % 2 === 0;
-            return (
-                 <div
-                    key={i}
-                    className="absolute w-full h-full origin-bottom-center"
-                    style={{ transform: `rotate(${tickRotation}deg)` }}
-                >
-                    <div className={cn(
-                        "bg-muted-foreground/50 absolute top-[5%]",
-                        isMajorTick ? "w-0.5 h-[8%]" : "w-px h-[5%]",
-                        "left-1/2 -translate-x-1/2"
-                    )}></div>
-                     {isMajorTick && (
-                        <div className="absolute top-[22%] left-1/2 -translate-x-1/2" style={{transform: `translateX(-50%) rotate(${-tickRotation}deg)`}}>
-                            <span className="text-xs text-muted-foreground">{i}</span>
-                        </div>
-                    )}
-                </div>
-            )
-          })}
-        </div>
       
        {/* Pointer */}
         <div
