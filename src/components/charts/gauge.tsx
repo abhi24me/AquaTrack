@@ -17,7 +17,7 @@ export function Gauge({ value, size = 'medium', showValue = true }: GaugeProps) 
   const rotation = percentage * 180 - 90;
 
   return (
-    <div className="relative flex flex-col items-center justify-center w-full">
+    <div className="relative flex flex-col items-center justify-center w-full h-full">
       <div
         className={cn(
           'relative w-24 h-12 overflow-hidden rounded-t-full bg-muted/50',
@@ -34,7 +34,7 @@ export function Gauge({ value, size = 'medium', showValue = true }: GaugeProps) 
               '--gauge-fg': 'hsl(var(--primary))',
               '--gauge-bg': 'hsl(var(--muted))',
               transform: `rotate(${percentage * 180}deg)`,
-              background: `conic-gradient(from -90deg at 50% 100%, var(--gauge-fg) 0deg, var(--gauge-fg) 180deg, var(--gauge-bg) 180deg)`,
+              background: `conic-gradient(from -90deg at 50% 100%, var(--gauge-fg) 0deg, var(--gauge-fg) 180deg, var(--gauge-bg) 180deg, var(--gauge-bg) 360deg)`,
               mask: 'linear-gradient(to right, #000, #000)',
               WebkitMask: 'linear-gradient(to right, #000, #000)',
             } as React.CSSProperties
@@ -50,7 +50,7 @@ export function Gauge({ value, size = 'medium', showValue = true }: GaugeProps) 
           )}
         ></div>
         <div
-          className="absolute inset-0 flex items-end justify-center origin-bottom transition-transform duration-500 ease-out"
+          className="absolute inset-0 flex items-end justify-center origin-bottom transition-transform duration-1000 ease-out"
           style={{ transform: `rotate(${rotation}deg)` }}
         >
           <GaugePointer
@@ -62,7 +62,7 @@ export function Gauge({ value, size = 'medium', showValue = true }: GaugeProps) 
         </div>
       </div>
       {showValue && (
-        <div className="absolute bottom-[-1.75rem] flex flex-col items-center">
+        <div className="absolute bottom-[-1.5rem] flex flex-col items-center text-center">
           <span className="text-xl font-bold text-foreground tabular-nums">
             {value.toFixed(1)}
           </span>
