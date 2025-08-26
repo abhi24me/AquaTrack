@@ -53,6 +53,27 @@ export default function ReportsPage() {
     from: subDays(new Date(), 6),
     to: new Date(),
   });
+  const [activeFilter, setActiveFilter] = React.useState<string>('Week');
+
+  const handleFilterClick = (filter: string) => {
+    setActiveFilter(filter);
+    const today = new Date();
+    switch (filter) {
+        case 'Today':
+            setDate({ from: today, to: today });
+            break;
+        case 'Week':
+            setDate({ from: subDays(today, 6), to: today });
+            break;
+        case 'Month':
+            setDate({ from: subDays(today, 29), to: today });
+            break;
+        case 'Year':
+            setDate({ from: subDays(today, 364), to: today });
+            break;
+    }
+  }
+
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:space-y-6 md:p-8">
@@ -67,64 +88,85 @@ export default function ReportsPage() {
             Select your desired parameters to generate a report.
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-wrap flex-col md:flex-row md:items-center gap-4">
-          <div className="grid gap-2">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  id="date"
-                  variant={'outline'}
-                  className={cn(
-                    'w-full justify-start text-left font-normal md:w-[300px]',
-                    !date && 'text-muted-foreground'
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date?.from ? (
-                    date.to ? (
-                      <>
-                        {format(date.from, 'LLL dd, y')} -{' '}
-                        {format(date.to, 'LLL dd, y')}
-                      </>
+        <CardContent className="flex flex-col gap-4">
+            <div className="flex items-center gap-1 self-start rounded-full bg-muted/50 p-1 sm:self-start">
+                {(['Today', 'Week', 'Month', 'Year']).map(
+                  (period) => (
+                    <Button
+                      key={period}
+                      size="sm"
+                      onClick={() => handleFilterClick(period)}
+                      className={cn(
+                        'h-7 rounded-full px-3 text-xs transition-colors',
+                        activeFilter === period
+                          ? 'bg-primary text-primary-foreground shadow-lg'
+                          : 'bg-transparent text-muted-foreground hover:bg-secondary'
+                      )}
+                    >
+                      {period}
+                    </Button>
+                  )
+                )}
+              </div>
+          <div className="flex flex-wrap flex-col md:flex-row md:items-center gap-4">
+            <div className="grid gap-2">
+                <Popover>
+                <PopoverTrigger asChild>
+                    <Button
+                    id="date"
+                    variant={'outline'}
+                    className={cn(
+                        'w-full justify-start text-left font-normal md:w-[300px]',
+                        !date && 'text-muted-foreground'
+                    )}
+                    >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date?.from ? (
+                        date.to ? (
+                        <>
+                            {format(date.from, 'LLL dd, y')} -{' '}
+                            {format(date.to, 'LLL dd, y')}
+                        </>
+                        ) : (
+                        format(date.from, 'LLL dd, y')
+                        )
                     ) : (
-                      format(date.from, 'LLL dd, y')
-                    )
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  initialFocus
-                  mode="range"
-                  defaultMonth={date?.from}
-                  selected={date}
-                  onSelect={setDate}
-                  numberOfMonths={2}
-                />
-              </PopoverContent>
-            </Popover>
+                        <span>Pick a date</span>
+                    )}
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={date?.from}
+                    selected={date}
+                    onSelect={setDate}
+                    numberOfMonths={2}
+                    />
+                </PopoverContent>
+                </Popover>
+            </div>
+            <Select defaultValue="all">
+                <SelectTrigger className="w-full md:w-[180px]">
+                <SelectValue placeholder="Select Scope" />
+                </SelectTrigger>
+                <SelectContent>
+                <SelectItem value="all">All Rooms</SelectItem>
+                <SelectItem value="room101">Room 101</SelectItem>
+                <SelectItem value="room102">Room 102</SelectItem>
+                <SelectItem value="room103">Room 103</SelectItem>
+                </SelectContent>
+            </Select>
+            <Button className="primary-button">
+                <Download className="mr-2 h-4 w-4" />
+                Download PDF
+            </Button>
+            <Button variant="secondary">
+                <Download className="mr-2 h-4 w-4" />
+                Download Excel
+            </Button>
           </div>
-          <Select defaultValue="all">
-            <SelectTrigger className="w-full md:w-[180px]">
-              <SelectValue placeholder="Select Scope" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Rooms</SelectItem>
-              <SelectItem value="room101">Room 101</SelectItem>
-              <SelectItem value="room102">Room 102</SelectItem>
-              <SelectItem value="room103">Room 103</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button className="primary-button">
-            <Download className="mr-2 h-4 w-4" />
-            Download PDF
-          </Button>
-          <Button variant="secondary">
-            <Download className="mr-2 h-4 w-4" />
-            Download Excel
-          </Button>
         </CardContent>
       </Card>
 
