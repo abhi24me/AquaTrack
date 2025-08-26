@@ -62,7 +62,7 @@ export function Gauge({ value, size = 'medium', showValue = true }: GaugeProps) 
         </div>
       </div>
       {showValue && (
-        <div className="absolute bottom-[-1.5rem] flex flex-col items-center text-center">
+        <div className="absolute bottom-[-0.5rem] flex flex-col items-center text-center">
           <span className="text-xl font-bold text-foreground tabular-nums">
             {value.toFixed(1)}
           </span>
