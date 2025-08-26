@@ -58,7 +58,7 @@ export function Gauge({ value, size = 'medium', showValue = true }: GaugeProps) 
         >
           <GaugePointer
             className={cn(
-              'h-[4.5rem] w-[4.5rem] fill-foreground text-foreground animate-breathing-glow',
+              'h-[4.5rem] w-[4.5rem] fill-foreground text-foreground',
               {
                 'h-16 w-16': size === 'small',
                 'h-24 w-24': size === 'large',
