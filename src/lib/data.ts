@@ -1,31 +1,110 @@
-import { AlertTriangle, Droplets, FileText } from 'lucide-react';
 
-export const weeklyUsageData = [
-  { day: 'Mon', desktop: 186, mobile: 160 },
-  { day: 'Tue', desktop: 305, mobile: 280 },
-  { day: 'Wed', desktop: 237, mobile: 220 },
-  { day: 'Thu', desktop: 273, mobile: 250 },
-  { day: 'Fri', desktop: 209, mobile: 190 },
-  { day: 'Sat', desktop: 214, mobile: 200 },
-  { day: 'Sun', desktop: 342, mobile: 310 },
-];
+import { AlertTriangle, Droplets, FileText, Gauge, BarChart } from 'lucide-react';
 
-export const leakData = [
-    { day: 'Mon', desktop: 186, mobile: 10 },
-    { day: 'Tue', desktop: 305, mobile: 10 },
-    { day: 'Wed', desktop: 237, mobile: 12 },
-    { day: 'Thu', desktop: 273, mobile: 12 },
-    { day: 'Fri', desktop: 209, mobile: 15 },
-    { day: 'Sat', desktop: 214, mobile: 15 },
-    { day: 'Sun', desktop: 342, mobile: 15 },
-]
+// --- Reusable Data Generation Functions ---
+const generateSeries = (
+  points: number,
+  generator: (i: number) => number,
+  leakGenerator?: (i: number) => number | undefined
+) => {
+  return Array.from({ length: points }, (_, i) => {
+    const entry: { [key: string]: any } = {
+      name: `Point ${i + 1}`,
+      usage: generator(i),
+    };
+    if (leakGenerator) {
+      entry.leaks = leakGenerator(i);
+    }
+    return entry;
+  });
+};
 
-export const roomUsageRanking = [
-  { name: 'Room 101', usage: 450, percentage: 90 },
-  { name: 'Room 102', usage: 320, percentage: 65 },
-  { name: 'Room 103', usage: 210, percentage: 40 },
-];
+const generateDailyData = (base: number) => generateSeries(24, (i) => base + Math.sin(i / 3) * (base / 4) + Math.random() * (base / 10), (i) => (i > 8 && i < 14 ? base / 20 : 0)).map((d, i) => ({ hour: `${i.toString().padStart(2, '0')}:00`, usage: Math.max(0, Math.round(d.usage)) }));
+const generateWeeklyData = (base: number) => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => ({ day, usage: Math.round(base * (7 + Math.sin(i) * 2 + Math.random())) }));
+const generateMonthlyData = (base: number) => Array.from({ length: 30 }, (_, i) => ({ day: i + 1, usage: Math.round(base * (30 + Math.sin(i/3) * 10 + Math.random() * 5))}));
+const generateYearlyData = (base: number) => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month) => ({ month, usage: Math.round(base * 365 * (1 + Math.random() * 0.2)) }));
 
+
+// --- Total Usage Data ---
+export const totalUsageData = {
+  Today: { usage: '1,250', comparison: '5% higher than yesterday' },
+  Week: { usage: '8,500', comparison: '2% lower than last week' },
+  Month: { usage: '34,200', comparison: '8% higher than last month' },
+  Year: { usage: '410,500', comparison: '12% higher than last year' },
+};
+
+
+// --- Quick Stats Data ---
+export const quickStatsData = {
+    Today: [
+        { title: 'Live Flow Rate', value: '2.3 L/min', icon: Gauge, glowing: false },
+        { title: "Today's Usage", value: '1,250 L', icon: Droplets, glowing: false },
+        { title: 'Avg Daily Flow', value: '0.87 L/min', icon: BarChart, glowing: false },
+        { title: 'Active Alerts', value: '2', icon: AlertTriangle, glowing: true },
+    ],
+    Week: [
+        { title: 'Total Leaks', value: '340 L', icon: Gauge, glowing: true },
+        { title: "This Week's Usage", value: '8,500 L', icon: Droplets, glowing: false },
+        { title: 'Avg Daily Usage', value: '1,214 L', icon: BarChart, glowing: false },
+        { title: 'Total Alerts', value: '8', icon: AlertTriangle, glowing: false },
+    ],
+    Month: [
+        { title: 'Total Leaks', value: '1,280 L', icon: Gauge, glowing: true },
+        { title: "This Month's Usage", value: '34,200 L', icon: Droplets, glowing: false },
+        { title: 'Avg Weekly Usage', value: '8,550 L', icon: BarChart, glowing: false },
+        { title: 'Total Alerts', value: '25', icon: AlertTriangle, glowing: false },
+    ],
+    Year: [
+        { title: 'Total Leaks', value: '15,360 L', icon: Gauge, glowing: true },
+        { title: "This Year's Usage", value: '410,500 L', icon: Droplets, glowing: false },
+        { title: 'Avg Monthly Usage', value: '34,208 L', icon: BarChart, glowing: false },
+        { title: 'Total Alerts', value: '180', icon: AlertTriangle, glowing: false },
+    ],
+};
+
+
+// --- Room-wise Usage Ranking ---
+export const roomUsageData = {
+  Today: [
+    { name: 'Room 101', usage: 450 },
+    { name: 'Room 102', usage: 320 },
+    { name: 'Room 103', usage: 210 },
+    { name: 'Lobby', usage: 150 },
+    { name: 'Gym', usage: 120 },
+  ],
+  Week: [
+    { name: 'Room 101', usage: 3150 },
+    { name: 'Room 102', usage: 2240 },
+    { name: 'Room 103', usage: 1470 },
+    { name: 'Lobby', usage: 1050 },
+    { name: 'Gym', usage: 840 },
+  ],
+  Month: [
+    { name: 'Room 101', usage: 12600 },
+    { name: 'Room 102', usage: 8960 },
+    { name: 'Room 103', usage: 5880 },
+    { name: 'Lobby', usage: 4200 },
+    { name: 'Gym', usage: 3360 },
+  ],
+  Year: [
+    { name: 'Room 101', usage: 151200 },
+    { name: 'Room 102', usage: 107520 },
+    { name: 'Room 103', usage: 70560 },
+    { name: 'Lobby', usage: 50400 },
+    { name: 'Gym', usage: 40320 },
+  ],
+};
+
+// --- Usage Summary (Highest/Lowest) ---
+export const usageSummaryData = {
+  Today: { highest: { name: 'Room 101', usage: 450 }, lowest: { name: 'Gym', usage: 120 } },
+  Week: { highest: { name: 'Room 101', usage: 3150 }, lowest: { name: 'Gym', usage: 840 } },
+  Month: { highest: { name: 'Room 101', usage: 12600 }, lowest: { name: 'Gym', usage: 3360 } },
+  Year: { highest: { name: 'Room 101', usage: 151200 }, lowest: { name: 'Gym', usage: 40320 } },
+};
+
+
+// --- Individual Room Data ---
 export const roomsData = [
     {
         id: 1,
@@ -34,13 +113,12 @@ export const roomsData = [
         flow: 5.1,
         dailyUsage: 450,
         notifications: true,
-        historical: [
-            { hour: '00:00', usage: 5 }, { hour: '01:00', usage: 5 }, { hour: '02:00', usage: 5 },
-            { hour: '03:00', usage: 5 }, { hour: '04:00', usage: 5 }, { hour: '05:00', usage: 5 },
-            { hour: '06:00', usage: 15 }, { hour: '07:00', usage: 30 }, { hour: '08:00', usage: 45 },
-            { hour: '09:00', usage: 20 }, { hour: '10:00', usage: 15 }, { hour: '11:00', usage: 10 },
-            { hour: '12:00', usage: 50 }, { hour: '13:00', usage: 40 },
-        ]
+        historical: {
+            Today: generateDailyData(18),
+            Week: generateWeeklyData(18*24),
+            Month: generateMonthlyData(18*24),
+            Year: generateYearlyData(18*24),
+        }
     },
     {
         id: 2,
@@ -49,11 +127,12 @@ export const roomsData = [
         flow: 0,
         dailyUsage: 320,
         notifications: true,
-        historical: [
-            { hour: '06:00', usage: 5 }, { hour: '07:00', usage: 10 }, { hour: '08:00', usage: 25 },
-            { hour: '09:00', usage: 30 }, { hour: '10:00', usage: 20 }, { hour: '11:00', usage: 25 },
-            { hour: '12:00', usage: 40 }, { hour: '13:00', usage: 35 },
-        ]
+        historical: {
+            Today: generateDailyData(13),
+            Week: generateWeeklyData(13*24),
+            Month: generateMonthlyData(13*24),
+            Year: generateYearlyData(13*24),
+        }
     },
     {
         id: 3,
@@ -62,14 +141,38 @@ export const roomsData = [
         flow: 0,
         dailyUsage: 210,
         notifications: false,
-        historical: [
-             { hour: '06:00', usage: 10 }, { hour: '07:00', usage: 20 }, { hour: '08:00', usage: 55 },
-            { hour: '09:00', usage: 60 }, { hour: '10:00', usage: 40 }, { hour: '11:00', usage: 55 },
-            { hour: '12:00', usage: 90 }, { hour: '13:00', usage: 110 },
-        ]
+        historical: {
+            Today: generateDailyData(8),
+            Week: generateWeeklyData(8*24),
+            Month: generateMonthlyData(8*24),
+            Year: generateYearlyData(8*24),
+        }
     },
 ];
 
+
+// --- Static data for Reports Page (can be expanded similarly if needed) ---
+export const weeklyUsageData = [
+  { day: 'Mon', usage: 186 },
+  { day: 'Tue', usage: 305 },
+  { day: 'Wed', usage: 237 },
+  { day: 'Thu', usage: 273 },
+  { day: 'Fri', usage: 209 },
+  { day: 'Sat', usage: 214 },
+  { day: 'Sun', usage: 342 },
+];
+
+export const leakData = [
+    { day: 'Mon', usage: 186, leaks: 10 },
+    { day: 'Tue', usage: 305, leaks: 10 },
+    { day: 'Wed', usage: 237, leaks: 12 },
+    { day: 'Thu', usage: 273, leaks: 12 },
+    { day: 'Fri', usage: 209, leaks: 15 },
+    { day: 'Sat', usage: 214, leaks: 15 },
+    { day: 'Sun', usage: 342, leaks: 15 },
+]
+
+// --- Notifications Data (Remains Static for now) ---
 export const notificationsData = [
   {
     id: 1,

@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { format } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { Calendar as CalendarIcon, Download } from 'lucide-react';
 import type { DateRange } from 'react-day-picker';
 
@@ -50,8 +50,8 @@ const OptimizedLineChart = dynamic(
 
 export default function ReportsPage() {
   const [date, setDate] = React.useState<DateRange | undefined>({
-    from: new Date(2024, 0, 20),
-    to: new Date(2024, 0, 27),
+    from: subDays(new Date(), 6),
+    to: new Date(),
   });
 
   return (

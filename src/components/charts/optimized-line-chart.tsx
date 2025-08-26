@@ -25,6 +25,10 @@ const chartConfig = {
     label: 'Usage (L)',
     color: 'hsl(var(--chart-1))',
   },
+  leaks: {
+    label: 'Leaks',
+    color: 'hsl(var(--destructive))'
+  },
   desktop: {
     label: 'Usage',
     color: 'hsl(var(--chart-1))'
@@ -37,11 +41,20 @@ const chartConfig = {
 
 interface OptimizedLineChartProps {
   data: any[];
+  dataKey: string;
+  xAxisKey?: string;
+  showLegend?: boolean;
 }
 
-const OptimizedLineChartComponent = ({ data }: OptimizedLineChartProps) => {
-    const hasMultipleLines = !!data[0]?.mobile;
-
+const OptimizedLineChartComponent = ({ 
+    data, 
+    dataKey, 
+    xAxisKey, 
+    showLegend = false 
+}: OptimizedLineChartProps) => {
+    const hasMultipleLines = !!data[0]?.mobile || !!data[0]?.leaks;
+    const currentXAxisKey = xAxisKey || (data[0]?.hour ? "hour" : "day");
+    
   return (
     <ChartContainer config={chartConfig} className="h-full w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -51,7 +64,7 @@ const OptimizedLineChartComponent = ({ data }: OptimizedLineChartProps) => {
         >
           <CartesianGrid strokeDasharray="3 3" vertical={false} />
           <XAxis
-            dataKey={data[0]?.hour ? "hour" : "day"}
+            dataKey={currentXAxisKey}
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -70,18 +83,18 @@ const OptimizedLineChartComponent = ({ data }: OptimizedLineChartProps) => {
               />
             }
           />
-           {hasMultipleLines && <ChartLegend content={<ChartLegendContent />} />}
+           {showLegend && hasMultipleLines && <ChartLegend content={<ChartLegendContent />} />}
           <Line
             type="monotone"
-            dataKey={data[0]?.usage ? "usage" : "desktop"}
-            stroke="var(--color-usage)"
+            dataKey={dataKey}
+            stroke={`var(--color-${dataKey})`}
             strokeWidth={2}
             dot={false}
           />
           {hasMultipleLines && (
             <Line
                 type="monotone"
-                dataKey="mobile"
+                dataKey={data[0]?.mobile ? 'mobile' : 'leaks'}
                 stroke="var(--color-mobile)"
                 strokeWidth={2}
                 dot={false}
