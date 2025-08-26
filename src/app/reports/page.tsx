@@ -136,17 +136,17 @@ export default function ReportsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-6 md:grid-cols-2">
-          <div>
-            <h3 className="mb-2 text-lg font-semibold">
+          <div className="flex flex-col gap-2">
+            <h3 className="text-lg font-semibold">
               Daily Usage Breakdown
             </h3>
-            <div className="relative h-[300px] w-full">
+            <div className="h-[300px] w-full">
               <OptimizedBarChart data={weeklyUsageData} />
             </div>
           </div>
-          <div>
-            <h3 className="mb-2 text-lg font-semibold">Usage vs. Leaks</h3>
-            <div className="relative h-[300px] w-full">
+          <div className="flex flex-col gap-2">
+            <h3 className="text-lg font-semibold">Usage vs. Leaks</h3>
+            <div className="h-[300px] w-full">
                 <OptimizedLineChart data={leakData} />
             </div>
           </div>
