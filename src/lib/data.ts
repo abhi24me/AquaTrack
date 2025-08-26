@@ -22,7 +22,7 @@ const generateSeries = (
 const generateDailyData = (base: number) => generateSeries(24, (i) => base + Math.sin(i / 3) * (base / 4) + Math.random() * (base / 10), (i) => (i > 8 && i < 14 ? base / 20 : 0)).map((d, i) => ({ hour: `${i.toString().padStart(2, '0')}:00`, usage: Math.max(0, Math.round(d.usage)) }));
 const generateWeeklyData = (base: number) => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => ({ day, usage: Math.round(base * (7 + Math.sin(i) * 2 + Math.random())) }));
 const generateMonthlyData = (base: number) => Array.from({ length: 30 }, (_, i) => ({ day: i + 1, usage: Math.round(base * (30 + Math.sin(i/3) * 10 + Math.random() * 5))}));
-const generateYearlyData = (base: number) => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month) => ({ month, usage: Math.round(base * 365 * (1 + Math.random() * 0.2)) }));
+const generateYearlyData = (base: number) => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month, i) => ({ month, usage: Math.round(base * 365 * (1 + Math.sin(i/2) * 0.2 + Math.random() * 0.1)) }));
 
 
 // --- Total Usage Data ---
@@ -67,29 +67,29 @@ export const quickStatsData = {
 export const roomUsageData = {
   Today: [
     { name: 'Room 101', usage: 450 },
-    { name: 'Room 102', usage: 320 },
-    { name: 'Room 103', usage: 210 },
+    { name: 'Kitchen', usage: 320 },
+    { name: 'Restroom L1', usage: 210 },
     { name: 'Lobby', usage: 150 },
     { name: 'Gym', usage: 120 },
   ],
   Week: [
     { name: 'Room 101', usage: 3150 },
-    { name: 'Room 102', usage: 2240 },
-    { name: 'Room 103', usage: 1470 },
+    { name: 'Kitchen', usage: 2240 },
+    { name: 'Restroom L1', usage: 1470 },
     { name: 'Lobby', usage: 1050 },
     { name: 'Gym', usage: 840 },
   ],
   Month: [
     { name: 'Room 101', usage: 12600 },
-    { name: 'Room 102', usage: 8960 },
-    { name: 'Room 103', usage: 5880 },
+    { name: 'Kitchen', usage: 8960 },
+    { name: 'Restroom L1', usage: 5880 },
     { name: 'Lobby', usage: 4200 },
     { name: 'Gym', usage: 3360 },
   ],
   Year: [
     { name: 'Room 101', usage: 151200 },
-    { name: 'Room 102', usage: 107520 },
-    { name: 'Room 103', usage: 70560 },
+    { name: 'Kitchen', usage: 107520 },
+    { name: 'Restroom L1', usage: 70560 },
     { name: 'Lobby', usage: 50400 },
     { name: 'Gym', usage: 40320 },
   ],
@@ -122,7 +122,7 @@ export const roomsData = [
     },
     {
         id: 2,
-        name: 'Room 102',
+        name: 'Kitchen',
         status: 'OK',
         flow: 0,
         dailyUsage: 320,
@@ -136,7 +136,7 @@ export const roomsData = [
     },
     {
         id: 3,
-        name: 'Room 103',
+        name: 'Restroom L1',
         status: 'OK',
         flow: 0,
         dailyUsage: 210,
@@ -150,27 +150,6 @@ export const roomsData = [
     },
 ];
 
-
-// --- Static data for Reports Page (can be expanded similarly if needed) ---
-export const weeklyUsageData = [
-  { day: 'Mon', usage: 186 },
-  { day: 'Tue', usage: 305 },
-  { day: 'Wed', usage: 237 },
-  { day: 'Thu', usage: 273 },
-  { day: 'Fri', usage: 209 },
-  { day: 'Sat', usage: 214 },
-  { day: 'Sun', usage: 342 },
-];
-
-export const leakData = [
-    { day: 'Mon', usage: 186, leaks: 10 },
-    { day: 'Tue', usage: 305, leaks: 10 },
-    { day: 'Wed', usage: 237, leaks: 12 },
-    { day: 'Thu', usage: 273, leaks: 12 },
-    { day: 'Fri', usage: 209, leaks: 15 },
-    { day: 'Sat', usage: 214, leaks: 15 },
-    { day: 'Sun', usage: 342, leaks: 15 },
-]
 
 // --- Notifications Data (Remains Static for now) ---
 export const notificationsData = [
@@ -186,7 +165,7 @@ export const notificationsData = [
     id: 2,
     icon: Droplets,
     title: 'High Usage Alert',
-    description: 'Room 102 has exceeded its daily threshold of 300 L.',
+    description: 'Kitchen has exceeded its daily threshold of 300 L.',
     time: '1 hour ago',
     variant: 'default',
   },
@@ -202,8 +181,35 @@ export const notificationsData = [
     id: 4,
     icon: AlertTriangle,
     title: 'Tap Left Open',
-    description: 'A tap in Room 103 was left open and has been automatically shut off.',
+    description: 'A tap in Restroom L1 was left open and has been automatically shut off.',
     time: 'Yesterday',
     variant: 'default',
   },
 ];
+
+
+// --- Report Preview Data ---
+
+const generateLeakData = (usage: number) => {
+    return Math.random() < 0.2 ? Math.round(usage * (0.05 + Math.random() * 0.1)) : 0;
+}
+
+const reportTodayBar = Array.from({length: 24}, (_, i) => ({ name: `${i}:00`, usage: Math.round(10 + Math.sin(i/3) * 20 + Math.random() * 15) }));
+const reportWeekBar = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => ({ name: day, usage: Math.round(200 + Math.random() * 150) }));
+const reportMonthBar = Array.from({length: 30}, (_, i) => ({ name: `Day ${i+1}`, usage: Math.round(150 + Math.sin(i/5) * 50 + Math.random() * 100) }));
+const reportYearBar = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(month => ({ name: month, usage: Math.round(5000 + Math.random() * 3000) }));
+
+
+export const reportPreviewBarData = {
+    Today: reportTodayBar,
+    Week: reportWeekBar,
+    Month: reportMonthBar,
+    Year: reportYearBar,
+};
+
+export const reportPreviewLineData = {
+    Today: reportTodayBar.map(d => ({ hour: d.name, usage: d.usage, leaks: generateLeakData(d.usage) })),
+    Week: reportWeekBar.map(d => ({ day: d.name, usage: d.usage, leaks: generateLeakData(d.usage) })),
+    Month: reportMonthBar.map(d => ({ day: d.name.split(' ')[1], usage: d.usage, leaks: generateLeakData(d.usage) })),
+    Year: reportYearBar.map(d => ({ month: d.name, usage: d.usage, leaks: generateLeakData(d.usage) })),
+}

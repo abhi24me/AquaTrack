@@ -53,7 +53,7 @@ const OptimizedLineChartComponent = ({
     showLegend = false 
 }: OptimizedLineChartProps) => {
     const hasMultipleLines = !!data[0]?.mobile || !!data[0]?.leaks;
-    const currentXAxisKey = xAxisKey || (data[0]?.hour ? "hour" : "day");
+    const currentXAxisKey = xAxisKey || (data[0]?.hour ? "hour" : (data[0]?.day ? "day" : "month"));
     
   return (
     <ChartContainer config={chartConfig} className="h-full w-full">
@@ -95,7 +95,7 @@ const OptimizedLineChartComponent = ({
             <Line
                 type="monotone"
                 dataKey={data[0]?.mobile ? 'mobile' : 'leaks'}
-                stroke="var(--color-mobile)"
+                stroke="var(--color-leaks)"
                 strokeWidth={2}
                 dot={false}
             />

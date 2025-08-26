@@ -37,6 +37,7 @@ const OptimizedBarChartComponent = ({
   data,
   layout = 'horizontal',
 }: OptimizedBarChartProps) => {
+  const xAxisDataKey = data[0]?.day ? 'day' : data[0]?.name ? 'name' : 'month';
   return (
     <ChartContainer config={chartConfig} className="h-full w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -59,7 +60,7 @@ const OptimizedBarChartComponent = ({
           />
           {layout === 'horizontal' ? (
              <XAxis
-              dataKey="day"
+              dataKey={xAxisDataKey}
               tickLine={false}
               tickMargin={10}
               axisLine={false}

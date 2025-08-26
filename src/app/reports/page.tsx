@@ -28,7 +28,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { weeklyUsageData, leakData } from '@/lib/data';
+import { reportPreviewBarData, reportPreviewLineData } from '@/lib/data';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -53,9 +53,9 @@ export default function ReportsPage() {
     from: subDays(new Date(), 6),
     to: new Date(),
   });
-  const [activeFilter, setActiveFilter] = React.useState<string>('Week');
+  const [activeFilter, setActiveFilter] = React.useState<'Today' | 'Week' | 'Month' | 'Year'>('Week');
 
-  const handleFilterClick = (filter: string) => {
+  const handleFilterClick = (filter: 'Today' | 'Week' | 'Month' | 'Year') => {
     setActiveFilter(filter);
     const today = new Date();
     switch (filter) {
@@ -74,6 +74,8 @@ export default function ReportsPage() {
     }
   }
 
+  const currentBarData = reportPreviewBarData[activeFilter];
+  const currentLineData = reportPreviewLineData[activeFilter];
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:space-y-6 md:p-8">
@@ -90,7 +92,7 @@ export default function ReportsPage() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
             <div className="flex items-center gap-1 self-start rounded-full bg-muted/50 p-1 sm:self-start">
-                {(['Today', 'Week', 'Month', 'Year']).map(
+                {(['Today', 'Week', 'Month', 'Year'] as const).map(
                   (period) => (
                     <Button
                       key={period}
@@ -180,16 +182,16 @@ export default function ReportsPage() {
         <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="flex flex-col gap-2">
             <h3 className="text-lg font-semibold">
-              Daily Usage Breakdown
+              Usage Breakdown
             </h3>
             <div className="h-[300px] w-full">
-              <OptimizedBarChart data={weeklyUsageData} />
+              <OptimizedBarChart data={currentBarData} />
             </div>
           </div>
           <div className="flex flex-col gap-2">
             <h3 className="text-lg font-semibold">Usage vs. Leaks</h3>
             <div className="h-[300px] w-full">
-                <OptimizedLineChart data={leakData} />
+                <OptimizedLineChart data={currentLineData} dataKey="usage" showLegend={true} />
             </div>
           </div>
         </CardContent>
