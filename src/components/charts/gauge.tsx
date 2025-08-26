@@ -28,13 +28,14 @@ export function Gauge({ value, size = 'medium', showValue = true }: GaugeProps) 
         )}
       >
         <div
-          className="absolute top-0 left-0 w-full h-full rounded-t-full origin-bottom-center transition-transform duration-500 ease-out"
+          className="absolute top-0 left-0 w-full h-full origin-bottom-center transition-transform duration-500 ease-out"
           style={
             {
-              '--gauge-fg': 'hsl(var(--primary))',
+              '--gauge-primary': 'hsl(var(--primary))',
+              '--gauge-accent': 'hsl(var(--accent))',
               '--gauge-bg': 'hsl(var(--muted))',
               transform: `rotate(${percentage * 180}deg)`,
-              background: `conic-gradient(from -90deg at 50% 100%, var(--gauge-fg) 0deg, var(--gauge-fg) 180deg, var(--gauge-bg) 180deg, var(--gauge-bg) 360deg)`,
+              background: `conic-gradient(from -90deg at 50% 100%, var(--gauge-accent) 0deg, var(--gauge-primary) 180deg, var(--gauge-bg) 180deg, var(--gauge-bg) 360deg)`,
               mask: 'linear-gradient(to right, #000, #000)',
               WebkitMask: 'linear-gradient(to right, #000, #000)',
             } as React.CSSProperties
