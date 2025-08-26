@@ -16,7 +16,7 @@ export function Gauge({ value }: GaugeProps) {
   const rotation = percentage * 180 - 90;
 
   return (
-    <div className="relative flex flex-col items-center justify-center w-full h-full max-w-[200px] mx-auto">
+    <div className="flex flex-col items-center justify-center w-full h-full max-w-[200px] mx-auto">
       <div className="relative w-full aspect-[2/1] overflow-hidden">
         {/* Background Arc */}
         <div
@@ -56,7 +56,7 @@ export function Gauge({ value }: GaugeProps) {
                         "left-1/2 -translate-x-1/2"
                     )}></div>
                      {isMajorTick && (
-                        <div className="absolute top-[18%] left-1/2 -translate-x-1/2" style={{transform: `translateX(-50%) rotate(${-tickRotation}deg)`}}>
+                        <div className="absolute top-[22%] left-1/2 -translate-x-1/2" style={{transform: `translateX(-50%) rotate(${-tickRotation}deg)`}}>
                             <span className="text-xs text-muted-foreground">{i}</span>
                         </div>
                     )}
@@ -72,15 +72,15 @@ export function Gauge({ value }: GaugeProps) {
         >
           <GaugePointer className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[90%]" />
         </div>
-      </div>
       
        {/* Value Display */}
-        <div className="absolute bottom-[20%] flex flex-col items-center text-center">
+        <div className="absolute bottom-[20%] flex flex-col items-center text-center w-full">
           <span className="text-3xl font-bold text-foreground tabular-nums leading-none">
             {value.toFixed(1)}
           </span>
-          <span className="text-sm text-muted-foreground">L/min</span>
         </div>
+      </div>
+      <span className="text-sm text-muted-foreground -mt-2">L/min</span>
     </div>
   );
 }
