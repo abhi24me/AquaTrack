@@ -88,7 +88,6 @@ export default function LoginPage() {
               <Input
                 id="water-id"
                 placeholder="enter your water id"
-                defaultValue="water123"
                 required
               />
             </div>
@@ -97,7 +96,6 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                defaultValue="water123"
                 required
               />
             </div>
