@@ -72,8 +72,8 @@ export default function Home() {
 
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-        <div className="elevated-card flex h-32 flex-col justify-center p-4 text-center md:h-36">
-          <Gauge value={2.3} />
+        <div className="elevated-card flex h-32 flex-col items-center justify-center p-4 md:h-36">
+          <Gauge value={2.3} showValue={true} />
           <p className="mt-2 text-xs text-muted-foreground">Live Flow Rate</p>
         </div>
         {currentQuickStats.map((stat, index) => (
