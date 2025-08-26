@@ -31,9 +31,8 @@ export function Gauge({ value }: GaugeProps) {
             clipPath: 'polygon(0 0, 100% 0, 100% 50%, 0 50%)',
             '--gauge-primary': 'hsl(var(--primary))',
             '--gauge-accent': 'hsl(var(--accent))',
-            transform: `rotate(${percentage * 180}deg)`,
             background: `conic-gradient(from -90deg at 50% 100%, var(--gauge-accent) 0deg, var(--gauge-primary) 180deg, transparent 180deg)`,
-            transition: 'transform 0.3s ease-out'
+            transition: 'all 0.3s ease-out'
           } as React.CSSProperties}
         ></div>
 
@@ -57,7 +56,7 @@ export function Gauge({ value }: GaugeProps) {
                         "left-1/2 -translate-x-1/2"
                     )}></div>
                      {isMajorTick && (
-                        <div className="absolute top-[15%] left-1/2 -translate-x-1/2" style={{transform: `translateX(-50%) rotate(${-tickRotation}deg)`}}>
+                        <div className="absolute top-[18%] left-1/2 -translate-x-1/2" style={{transform: `translateX(-50%) rotate(${-tickRotation}deg)`}}>
                             <span className="text-xs text-muted-foreground">{i}</span>
                         </div>
                     )}
@@ -85,5 +84,3 @@ export function Gauge({ value }: GaugeProps) {
     </div>
   );
 }
-
-    
