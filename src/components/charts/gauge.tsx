@@ -53,7 +53,7 @@ export function Gauge({ value }: GaugeProps) {
           </span>
         </div>
       </div>
-      <span className="text-sm text-muted-foreground -mt-2">L/min</span>
+      <span className="text-sm text-muted-foreground mt-1">L/min</span>
     </div>
   );
 }
