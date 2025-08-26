@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Card,
   CardContent,
@@ -43,18 +43,44 @@ type Timeframe = 'Today' | 'Week' | 'Month' | 'Year';
 export default function Home() {
   const [timeframe, setTimeframe] = useState<Timeframe>('Today');
   const [flowRate, setFlowRate] = useState(2.3);
+  const animationFrameId = useRef<number | null>(null);
+  const lastUpdateTime = useRef(Date.now());
+  const targetFlowRate = useRef(2.3);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setFlowRate((prevRate) => {
-        const change = (Math.random() - 0.5) * 0.2; 
-        let newRate = prevRate + change;
-        newRate += (Math.sin(Date.now() / 3000) * 0.1);
-        return parseFloat(Math.max(0.5, Math.min(newRate, 9.5)).toFixed(1));
-      });
-    }, 1500);
+    const animateFlowRate = () => {
+      const now = Date.now();
+      const timeSinceLastUpdate = now - lastUpdateTime.current;
 
-    return () => clearInterval(interval);
+      // Update target flow rate periodically
+      if (timeSinceLastUpdate > 2000) {
+        const randomChange = (Math.random() - 0.5) * 1.5;
+        targetFlowRate.current = Math.max(0.5, Math.min(targetFlowRate.current + randomChange, 9.5));
+        lastUpdateTime.current = now;
+      }
+      
+      setFlowRate(currentFlowRate => {
+        const difference = targetFlowRate.current - currentFlowRate;
+        const easing = 0.05;
+        const newFlowRate = currentFlowRate + difference * easing;
+        
+        // Add a small sine wave for organic drift
+        const drift = Math.sin(now / 1000) * 0.05;
+        const finalFlowRate = newFlowRate + drift;
+
+        return parseFloat(Math.max(0.5, Math.min(finalFlowRate, 9.5)).toFixed(2));
+      });
+      
+      animationFrameId.current = requestAnimationFrame(animateFlowRate);
+    };
+
+    animationFrameId.current = requestAnimationFrame(animateFlowRate);
+
+    return () => {
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+      }
+    };
   }, []);
 
   const handleTimeframeChange = (newTimeframe: Timeframe) => {
@@ -86,11 +112,13 @@ export default function Home() {
 
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-        <div className="elevated-card flex h-32 flex-col items-center justify-center p-4 md:h-36">
-          <p className="mb-1 text-center text-xs font-medium text-muted-foreground">
+        <div className="elevated-card flex flex-col items-center justify-center p-4">
+          <p className="mb-2 text-center text-xs font-medium text-muted-foreground">
             Live Flow Rate
           </p>
-          <Gauge value={flowRate} showValue={true} />
+          <div className="flex-grow w-full h-full">
+            <Gauge value={flowRate} />
+          </div>
         </div>
         {currentQuickStats.map((stat, index) => (
           <div
@@ -234,3 +262,5 @@ export default function Home() {
     </div>
   );
 }
+
+    

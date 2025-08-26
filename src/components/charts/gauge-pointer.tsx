@@ -7,17 +7,18 @@ export const GaugePointer = ({
 }: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 100 100"
-    className={cn(className)}
+    viewBox="0 0 100 65"
+    className={cn('pointer-events-none', className)}
     {...props}
   >
+    <path d="M50 5 L50 60" stroke="hsl(var(--primary))" strokeWidth="2" strokeLinecap="round" />
     <path
-      d="M49.5 95C49.5 95 49.5 95 49.5 95 49.7761 95 50 94.7761 50 94.5L50 10C50 9.72386 49.7761 9.5 49.5 9.5 49.2239 9.5 49 9.72386 49 10L49 94.5C49 94.7761 49.2239 95 49.5 95Z"
-      fill="currentColor"
-      stroke="currentColor"
-      strokeWidth="1"
+      d="M45 60 C 47.5 65, 52.5 65, 55 60 L 50 5 Z"
+      fill="hsl(var(--primary))"
+      className="drop-shadow-[0_4px_4px_rgba(0,0,0,0.25)]"
     />
-    <circle cx="50" cy="95" r="4" fill="hsl(var(--background))" />
-    <circle cx="50" cy="95" r="2" fill="currentColor" />
+     <circle cx="50" cy="60" r="3" fill="hsl(var(--background))" />
   </svg>
 );
+
+    

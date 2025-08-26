@@ -6,75 +6,84 @@ import { GaugePointer } from './gauge-pointer';
 
 interface GaugeProps {
   value: number;
-  size?: 'small' | 'medium' | 'large';
-  showValue?: boolean;
 }
 
 const MAX_VALUE = 10; // L/min
+const TICKS = 11; // 0 to 10
 
-export function Gauge({ value, size = 'medium', showValue = true }: GaugeProps) {
+export function Gauge({ value }: GaugeProps) {
   const percentage = Math.min(Math.max(value / MAX_VALUE, 0), 1);
   const rotation = percentage * 180 - 90;
 
   return (
-    <div className="relative flex flex-col items-center justify-center w-full h-full">
-      <div
-        className={cn(
-          'relative w-24 h-12 overflow-hidden rounded-t-full bg-muted/50',
-          {
-            'w-20 h-10': size === 'small',
-            'w-28 h-14': size === 'large',
-          }
-        )}
-      >
-        <div className="absolute top-0 left-0 w-full h-full origin-bottom-center">
-          <div
-            className="absolute top-0 left-0 w-full h-full origin-bottom-center transition-transform duration-500 ease-out"
-            style={
-              {
-                '--gauge-primary': 'hsl(var(--primary))',
-                '--gauge-accent': 'hsl(var(--accent))',
-                '--gauge-bg': 'hsl(var(--muted))',
-                transform: `rotate(${percentage * 180}deg)`,
-                background: `conic-gradient(from -90deg at 50% 100%, var(--gauge-accent) 0deg, var(--gauge-primary) 180deg, var(--gauge-bg) 180deg, var(--gauge-bg) 360deg)`,
-                mask: 'linear-gradient(to right, #000, #000)',
-                WebkitMask: 'linear-gradient(to right, #000, #000)',
-              } as React.CSSProperties
-            }
-          ></div>
-        </div>
+    <div className="relative flex flex-col items-center justify-center w-full h-full max-w-[200px] mx-auto">
+      <div className="relative w-full aspect-[2/1] overflow-hidden">
+        {/* Background Arc */}
         <div
-          className={cn(
-            'absolute inset-[10px] bottom-0 rounded-t-full bg-background',
-            {
-              'inset-[8px]': size === 'small',
-              'inset-[12px]': size === 'large',
-            }
-          )}
+          className="absolute top-0 left-0 w-full h-[200%] rounded-full bg-muted/60"
+          style={{ clipPath: 'polygon(0 0, 100% 0, 100% 50%, 0 50%)' }}
         ></div>
+
+        {/* Gradient Arc */}
         <div
-          className="absolute inset-0 flex items-end justify-center origin-bottom transition-transform duration-1000 ease-out"
+          className="absolute top-0 left-0 w-full h-[200%] rounded-full"
+          style={{
+            clipPath: 'polygon(0 0, 100% 0, 100% 50%, 0 50%)',
+            '--gauge-primary': 'hsl(var(--primary))',
+            '--gauge-accent': 'hsl(var(--accent))',
+            transform: `rotate(${percentage * 180}deg)`,
+            background: `conic-gradient(from -90deg at 50% 100%, var(--gauge-accent) 0deg, var(--gauge-primary) 180deg, transparent 180deg)`,
+            transition: 'transform 0.3s ease-out'
+          } as React.CSSProperties}
+        ></div>
+
+         {/* Inner Mask */}
+        <div className="absolute top-[10%] left-[10%] w-[80%] h-[160%] rounded-full bg-card" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 50%, 0 50%)' }}></div>
+      
+        {/* Ticks */}
+        <div className="absolute top-0 left-0 w-full h-full">
+          {Array.from({ length: TICKS }).map((_, i) => {
+             const tickRotation = (i / (TICKS - 1)) * 180 - 90;
+             const isMajorTick = i % 2 === 0;
+            return (
+                 <div
+                    key={i}
+                    className="absolute w-full h-full origin-bottom-center"
+                    style={{ transform: `rotate(${tickRotation}deg)` }}
+                >
+                    <div className={cn(
+                        "bg-muted-foreground/50 absolute top-[5%]",
+                        isMajorTick ? "w-0.5 h-[8%]" : "w-px h-[5%]",
+                        "left-1/2 -translate-x-1/2"
+                    )}></div>
+                     {isMajorTick && (
+                        <div className="absolute top-[15%] left-1/2 -translate-x-1/2" style={{transform: `translateX(-50%) rotate(${-tickRotation}deg)`}}>
+                            <span className="text-xs text-muted-foreground">{i}</span>
+                        </div>
+                    )}
+                </div>
+            )
+          })}
+        </div>
+      
+       {/* Pointer */}
+        <div
+          className="absolute bottom-0 left-0 w-full h-full origin-bottom transition-transform duration-300 ease-out"
           style={{ transform: `rotate(${rotation}deg)` }}
         >
-          <GaugePointer
-            className={cn(
-              'h-[4.5rem] w-[4.5rem] fill-foreground text-foreground',
-              {
-                'h-16 w-16': size === 'small',
-                'h-24 w-24': size === 'large',
-              }
-            )}
-          />
+          <GaugePointer className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[90%]" />
         </div>
       </div>
-      {showValue && (
-        <div className="absolute bottom-[0.4rem] flex flex-col items-center text-center">
-          <span className="text-xl font-bold text-foreground tabular-nums">
+      
+       {/* Value Display */}
+        <div className="absolute bottom-[20%] flex flex-col items-center text-center">
+          <span className="text-3xl font-bold text-foreground tabular-nums leading-none">
             {value.toFixed(1)}
           </span>
-          <span className="text-xs text-muted-foreground">L/min</span>
+          <span className="text-sm text-muted-foreground">L/min</span>
         </div>
-      )}
     </div>
   );
 }
+
+    
