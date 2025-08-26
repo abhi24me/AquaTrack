@@ -124,22 +124,22 @@ function MobileFooter() {
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
-            <Link href={item.href} key={item.label} className="flex-1">
+            <Link href={item.href} key={item.label} className="flex flex-col items-center justify-center h-full flex-1 min-w-0 px-1">
               <div
                 className={cn(
-                  'flex flex-col items-center justify-center h-full p-2 rounded-lg transition-colors duration-300',
+                  'flex flex-col items-center justify-center h-full p-1 rounded-lg transition-colors duration-300 w-full',
                   isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                 )}
               >
                 <div
                   className={cn(
-                    'relative flex items-center justify-center w-16 h-8 rounded-full mb-1 transition-all duration-300',
+                    'relative flex items-center justify-center w-14 h-8 rounded-full mb-1 transition-all duration-300',
                     isActive ? 'bg-primary/20' : ''
                   )}
                 >
-                  <item.icon className="h-6 w-6" />
+                  <item.icon className="h-5 w-5" />
                 </div>
-                <span className="text-xs font-medium">{item.label}</span>
+                <span className="text-xs font-medium truncate">{item.label}</span>
               </div>
             </Link>
           );
