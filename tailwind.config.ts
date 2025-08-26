@@ -76,10 +76,19 @@ export default {
             height: '0',
           },
         },
+        'breathing-glow': {
+          '0%, 100%': {
+            filter: 'drop-shadow(0 0 2px hsl(var(--primary) / 0.4))',
+          },
+          '50%': {
+            filter: 'drop-shadow(0 0 6px hsl(var(--primary) / 0.8))',
+          },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'breathing-glow': 'breathing-glow 3s ease-in-out infinite',
       },
     },
   },

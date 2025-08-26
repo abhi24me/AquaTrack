@@ -46,16 +46,18 @@ export default function Home() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const change = (Math.random() - 0.5) * 0.5;
       setFlowRate((prevRate) => {
-        const newRate = prevRate + change;
-        return parseFloat(Math.min(Math.max(newRate, 0.5), 9.5).toFixed(1));
+        // More realistic fluctuation
+        const change = (Math.random() - 0.5) * 0.2; // Smaller, smoother changes
+        let newRate = prevRate + change;
+        // Add a gentle "drift"
+        newRate += (Math.sin(Date.now() / 3000) * 0.1);
+        return parseFloat(Math.max(0.5, Math.min(newRate, 9.5)).toFixed(1));
       });
     }, 1500);
 
     return () => clearInterval(interval);
   }, []);
-
 
   const handleTimeframeChange = (newTimeframe: Timeframe) => {
     setTimeframe(newTimeframe);
@@ -87,8 +89,10 @@ export default function Home() {
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
         <div className="elevated-card flex h-32 flex-col items-center justify-center p-4 md:h-36">
-          <p className="mb-2 text-xs text-muted-foreground">Live Flow Rate</p>
-          <Gauge value={flowRate} showValue={true} />
+          <p className="mb-2 text-xs font-medium text-muted-foreground">
+            Live Flow Rate
+          </p>
+          <Gauge value={flowRate} showValue={false} />
         </div>
         {currentQuickStats.map((stat, index) => (
           <div
