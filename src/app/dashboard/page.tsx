@@ -46,9 +46,14 @@ export default function Home() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const newFlowRate = parseFloat((Math.random() * 10).toFixed(1));
-      setFlowRate(newFlowRate);
-    }, 2500);
+      // Create a more natural fluctuation
+      const change = (Math.random() - 0.5) * 2; // a value between -1 and 1
+      setFlowRate((prevRate) => {
+        const newRate = prevRate + change;
+        // Clamp the value between 0 and 10 and fix to 1 decimal place
+        return parseFloat(Math.min(Math.max(newRate, 0), 10).toFixed(1));
+      });
+    }, 2000); // Update every 2 seconds for a smoother feel
 
     return () => clearInterval(interval);
   }, []);

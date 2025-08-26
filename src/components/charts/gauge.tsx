@@ -17,7 +17,7 @@ export function Gauge({ value, size = 'medium', showValue = true }: GaugeProps) 
   const rotation = percentage * 180 - 90;
 
   return (
-    <div className="relative flex flex-col items-center justify-center">
+    <div className="relative flex flex-col items-center justify-center w-full">
       <div
         className={cn(
           'relative w-24 h-12 overflow-hidden rounded-t-full bg-muted/50',
@@ -28,15 +28,15 @@ export function Gauge({ value, size = 'medium', showValue = true }: GaugeProps) 
         )}
       >
         <div
-          className="absolute top-0 left-0 w-full h-full rounded-t-full origin-bottom-center"
+          className="absolute top-0 left-0 w-full h-full rounded-t-full origin-bottom-center transition-transform duration-500 ease-out"
           style={
             {
               '--gauge-fg': 'hsl(var(--primary))',
+              '--gauge-bg': 'hsl(var(--muted))',
               transform: `rotate(${percentage * 180}deg)`,
-              background: `conic-gradient(from -90deg at 50% 100%, transparent 0deg, var(--gauge-fg) 0deg, var(--gauge-fg) 180deg, transparent 180deg)`,
+              background: `conic-gradient(from -90deg at 50% 100%, var(--gauge-fg) 0deg, var(--gauge-fg) 180deg, var(--gauge-bg) 180deg)`,
               mask: 'linear-gradient(to right, #000, #000)',
               WebkitMask: 'linear-gradient(to right, #000, #000)',
-              transition: 'transform 0.5s ease-out',
             } as React.CSSProperties
           }
         ></div>
@@ -62,8 +62,10 @@ export function Gauge({ value, size = 'medium', showValue = true }: GaugeProps) 
         </div>
       </div>
       {showValue && (
-        <div className="absolute bottom-[-1.5rem] flex flex-col items-center">
-          <span className="text-xl font-bold text-foreground">{value}</span>
+        <div className="absolute bottom-[-1.75rem] flex flex-col items-center">
+          <span className="text-xl font-bold text-foreground tabular-nums">
+            {value.toFixed(1)}
+          </span>
           <span className="text-xs text-muted-foreground">L/min</span>
         </div>
       )}
