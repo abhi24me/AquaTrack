@@ -1,5 +1,6 @@
 
-import { AlertTriangle, Droplets, FileText, Gauge, BarChart } from 'lucide-react';
+import { Droplets, BarChart } from 'lucide-react';
+import { AlertTriangle, FileText } from 'lucide-react';
 
 // --- Reusable Data Generation Functions ---
 const generateSeries = (
@@ -37,28 +38,20 @@ export const totalUsageData = {
 // --- Quick Stats Data ---
 export const quickStatsData = {
     Today: [
-        { title: 'Live Flow Rate', value: '2.3 L/min', icon: Gauge, glowing: false },
-        { title: "Today's Usage", value: '1,250 L', icon: Droplets, glowing: false },
-        { title: 'Avg Daily Flow', value: '0.87 L/min', icon: BarChart, glowing: false },
-        { title: 'Active Alerts', value: '2', icon: AlertTriangle, glowing: true },
+        { title: "Today's Usage", value: '1,250 L', icon: Droplets },
+        { title: 'Avg Daily Flow', value: '0.87 L/min', icon: BarChart },
     ],
     Week: [
-        { title: 'Total Leaks', value: '340 L', icon: Gauge, glowing: true },
-        { title: "This Week's Usage", value: '8,500 L', icon: Droplets, glowing: false },
-        { title: 'Avg Daily Usage', value: '1,214 L', icon: BarChart, glowing: false },
-        { title: 'Total Alerts', value: '8', icon: AlertTriangle, glowing: false },
+        { title: 'Total Leaks', value: '340 L', icon: Droplets },
+        { title: 'Avg Daily Usage', value: '1,214 L', icon: BarChart },
     ],
     Month: [
-        { title: 'Total Leaks', value: '1,280 L', icon: Gauge, glowing: true },
-        { title: "This Month's Usage", value: '34,200 L', icon: Droplets, glowing: false },
-        { title: 'Avg Weekly Usage', value: '8,550 L', icon: BarChart, glowing: false },
-        { title: 'Total Alerts', value: '25', icon: AlertTriangle, glowing: false },
+        { title: 'Total Leaks', value: '1,280 L', icon: Droplets },
+        { title: 'Avg Weekly Usage', value: '8,550 L', icon: BarChart },
     ],
     Year: [
-        { title: 'Total Leaks', value: '15,360 L', icon: Gauge, glowing: true },
-        { title: "This Year's Usage", value: '410,500 L', icon: Droplets, glowing: false },
-        { title: 'Avg Monthly Usage', value: '34,208 L', icon: BarChart, glowing: false },
-        { title: 'Total Alerts', value: '180', icon: AlertTriangle, glowing: false },
+        { title: 'Total Leaks', value: '15,360 L', icon: Droplets },
+        { title: 'Avg Monthly Usage', value: '34,208 L', icon: BarChart },
     ],
 };
 
@@ -150,6 +143,10 @@ export const roomsData = [
     },
 ];
 
+export const activeAlerts = [
+  { room: 'Room 101', message: 'Continuous flow of 5.1 L/hr detected.' },
+  { room: 'Kitchen', message: 'Daily usage threshold of 300L exceeded.' },
+];
 
 // --- Notifications Data (Remains Static for now) ---
 export const notificationsData = [
