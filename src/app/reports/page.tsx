@@ -135,7 +135,7 @@ export default function ReportsPage() {
             A preview of the data for the selected period.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-6 md:grid-cols-2">
+        <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="flex flex-col gap-2">
             <h3 className="text-lg font-semibold">
               Daily Usage Breakdown
