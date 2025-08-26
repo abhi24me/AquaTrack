@@ -39,7 +39,7 @@ export default function RoomsPage() {
   
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:space-y-6 md:p-8">
-      <div className="flex items-center justify-between space-y-2">
+      <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <h2 className="text-3xl font-bold tracking-tight">Room Monitoring</h2>
         <div className="flex items-center gap-1 self-start rounded-full bg-muted/50 p-1 sm:self-center">
           {(['Today', 'Week', 'Month', 'Year'] as Timeframe[]).map((period) => (
