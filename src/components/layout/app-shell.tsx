@@ -1,6 +1,6 @@
 
 'use client';
-import type { ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -119,10 +119,16 @@ function MobileHeader() {
 
 function MobileFooter() {
     const pathname = usePathname();
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
     return (
         <footer className="md:hidden fixed bottom-0 z-30 flex h-20 w-full items-center justify-around border-t border-border bg-card/80 backdrop-blur-lg">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = isClient && pathname === item.href;
           return (
             <Link href={item.href} key={item.label} className="flex flex-col items-center justify-center h-full flex-1 min-w-0 px-1">
               <div
