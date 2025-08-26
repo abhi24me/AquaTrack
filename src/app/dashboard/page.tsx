@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -42,6 +42,17 @@ type Timeframe = 'Today' | 'Week' | 'Month' | 'Year';
 
 export default function Home() {
   const [timeframe, setTimeframe] = useState<Timeframe>('Today');
+  const [flowRate, setFlowRate] = useState(2.3);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newFlowRate = parseFloat((Math.random() * 10).toFixed(1));
+      setFlowRate(newFlowRate);
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, []);
+
 
   const handleTimeframeChange = (newTimeframe: Timeframe) => {
     setTimeframe(newTimeframe);
@@ -73,7 +84,7 @@ export default function Home() {
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
         <div className="elevated-card flex h-32 flex-col items-center justify-center p-4 md:h-36">
-          <Gauge value={2.3} showValue={true} />
+          <Gauge value={flowRate} showValue={true} />
           <p className="mt-2 text-xs text-muted-foreground">Live Flow Rate</p>
         </div>
         {currentQuickStats.map((stat, index) => (
