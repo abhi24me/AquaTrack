@@ -79,7 +79,6 @@ export default function LoginPage() {
           <CardDescription>
             Enter your credentials to access your dashboard.
           </CardDescription>
-          <p className="pt-2 text-lg font-semibold text-primary">lets save it</p>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -87,7 +86,7 @@ export default function LoginPage() {
               <Label htmlFor="water-id">Water ID</Label>
               <Input
                 id="water-id"
-                placeholder="enter your water id"
+                placeholder="Enter your building or unit ID"
                 required
               />
             </div>

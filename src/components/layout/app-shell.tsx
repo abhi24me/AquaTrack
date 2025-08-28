@@ -10,7 +10,6 @@ import {
   Bell,
   Settings,
   Droplets,
-  User,
   LogOut,
   UserCog,
 } from 'lucide-react';
@@ -24,7 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const navItems = [
   { href: '/dashboard', label: 'Home', icon: Home },
@@ -47,8 +46,7 @@ function DesktopSidebar() {
             AquaTrack
           </h1>
         </div>
-      </header>
-      <nav className="flex-1 p-4 space-y-2">
+      </header>      <nav className="flex-1 p-4 space-y-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -73,7 +71,6 @@ function DesktopSidebar() {
 }
 
 function MobileHeader() {
-  const pathname = usePathname();
     return (
         <header className="md:hidden sticky top-0 z-30 flex h-16 items-center justify-between gap-4 bg-background/80 px-4 backdrop-blur-sm border-b border-border shrink-0">
         <div className="flex items-center gap-2">
