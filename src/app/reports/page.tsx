@@ -49,11 +49,15 @@ const OptimizedLineChart = dynamic(
 
 
 export default function ReportsPage() {
-  const [date, setDate] = React.useState<DateRange | undefined>({
-    from: subDays(new Date(), 6),
-    to: new Date(),
-  });
+  const [date, setDate] = React.useState<DateRange | undefined>(undefined);
   const [activeFilter, setActiveFilter] = React.useState<'Today' | 'Week' | 'Month' | 'Year'>('Week');
+
+  React.useEffect(() => {
+    setDate({
+        from: subDays(new Date(), 6),
+        to: new Date(),
+    });
+  }, []);
 
   const handleFilterClick = (filter: 'Today' | 'Week' | 'Month' | 'Year') => {
     setActiveFilter(filter);
