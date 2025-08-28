@@ -1,5 +1,6 @@
 
 'use client';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -25,6 +26,11 @@ import { useTheme } from 'next-themes';
 export default function SettingsPage() {
   const { toast } = useToast();
   const { setTheme, theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -139,51 +145,53 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <Label>Theme</Label>
-              <RadioGroup
-                value={theme}
-                onValueChange={setTheme}
-                className="grid max-w-md grid-cols-3 gap-8 pt-2"
-              >
-                <div>
-                  <RadioGroupItem
-                    value="light"
-                    id="light"
-                    className="peer sr-only"
-                  />
-                  <Label
-                    htmlFor="light"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  >
-                    Light
-                  </Label>
-                </div>
-                <div>
-                  <RadioGroupItem
-                    value="dark"
-                    id="dark"
-                    className="peer sr-only"
-                  />
-                  <Label
-                    htmlFor="dark"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  >
-                    Dark
-                  </Label>
-                </div>
-                <div>
-                  <RadioGroupItem
-                    value="system"
-                    id="system"
-                    className="peer sr-only"
-                  />
-                  <Label
-                    htmlFor="system"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  >
-                    System
-                  </Label>
-                </div>
-              </RadioGroup>
+              {mounted && (
+                <RadioGroup
+                  value={theme}
+                  onValueChange={setTheme}
+                  className="grid max-w-md grid-cols-3 gap-8 pt-2"
+                >
+                  <div>
+                    <RadioGroupItem
+                      value="light"
+                      id="light"
+                      className="peer sr-only"
+                    />
+                    <Label
+                      htmlFor="light"
+                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                    >
+                      Light
+                    </Label>
+                  </div>
+                  <div>
+                    <RadioGroupItem
+                      value="dark"
+                      id="dark"
+                      className="peer sr-only"
+                    />
+                    <Label
+                      htmlFor="dark"
+                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                    >
+                      Dark
+                    </Label>
+                  </div>
+                  <div>
+                    <RadioGroupItem
+                      value="system"
+                      id="system"
+                      className="peer sr-only"
+                    />
+                    <Label
+                      htmlFor="system"
+                      className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                    >
+                      System
+                    </Label>
+                  </div>
+                </RadioGroup>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
