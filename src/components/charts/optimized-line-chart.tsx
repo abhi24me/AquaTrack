@@ -52,7 +52,7 @@ const OptimizedLineChartComponent = ({
     xAxisKey, 
     showLegend = false 
 }: OptimizedLineChartProps) => {
-    const hasMultipleLines = !!data[0]?.mobile || !!data[0]?.leaks;
+    const hasMultipleLines = data?.length > 0 && ('mobile' in data[0] || 'leaks' in data[0]);
     const currentXAxisKey = xAxisKey || (data[0]?.hour ? "hour" : (data[0]?.day ? "day" : "month"));
     
   return (
