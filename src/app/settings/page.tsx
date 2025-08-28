@@ -142,7 +142,7 @@ export default function SettingsPage() {
               <RadioGroup
                 value={theme}
                 onValueChange={setTheme}
-                className="grid max-w-md grid-cols-2 gap-8 pt-2"
+                className="grid max-w-md grid-cols-3 gap-8 pt-2"
               >
                 <div>
                   <RadioGroupItem
@@ -168,6 +168,19 @@ export default function SettingsPage() {
                     className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                   >
                     Dark
+                  </Label>
+                </div>
+                <div>
+                  <RadioGroupItem
+                    value="system"
+                    id="system"
+                    className="peer sr-only"
+                  />
+                  <Label
+                    htmlFor="system"
+                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                  >
+                    System
                   </Label>
                 </div>
               </RadioGroup>
