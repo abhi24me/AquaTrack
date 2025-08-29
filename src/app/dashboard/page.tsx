@@ -87,37 +87,44 @@ export default function Home() {
     const fetchUsageData = async () => {
       setLoading(true);
       try {
-        const roomNames = ['Room 101', 'Kitchen', 'Restroom L1'];
-        const promises = roomNames.map(room => 
-          fetch(`http://localhost:5000/usage/${encodeURIComponent(room)}`).then(res => res.json())
+        const response = await fetch("http://localhost:5000/usage");
+        const results = await response.json();
+
+        if (!Array.isArray(results)) {
+          throw new Error("Invalid data format from server");
+        }
+
+        const total = results.reduce(
+          (acc, room) => acc + (room.dailyUsage?.usage || 0),
+          0
         );
-        const results = await Promise.all(promises);
-        
-        const validResults = results.filter(r => !r.error);
-        const total = validResults.reduce((acc, room) => acc + (room.dailyUsage?.usage || 0), 0);
         setTotalUsage(total);
 
-        const usageData = validResults.map(room => ({
-          name: room.room,
-          usage: room.dailyUsage?.usage || 0,
-        })).sort((a,b) => b.usage - a.usage);
-        setRoomUsage(usageData);
+        const usageData = results
+          .map((room) => ({
+            name: room.room,
+            usage: room.dailyUsage?.usage || 0,
+          }))
+          .sort((a, b) => b.usage - a.usage);
 
+        setRoomUsage(usageData);
       } catch (error) {
         console.error("Failed to fetch usage data:", error);
-        // Fallback to mock data on error
+        // fallback in case of API error
         setRoomUsage([
-          { name: 'Room 101', usage: 0 },
-          { name: 'Kitchen', usage: 0 },
-          { name: 'Restroom L1', usage: 0 },
+          { name: "Room 101", usage: 0 },
+          { name: "Kitchen", usage: 0 },
+          { name: "Restroom L1", usage: 0 },
         ]);
         setTotalUsage(0);
       } finally {
         setLoading(false);
       }
     };
+
     fetchUsageData();
   }, []);
+
 
   const handleTimeframeChange = (newTimeframe: Timeframe) => {
     setTimeframe(newTimeframe);
