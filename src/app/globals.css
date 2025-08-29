@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 100% 97%; /* #F0F8FF */
+    --foreground: 215 28% 17%; /* #212836 */
+    --card: 0 0% 100%;
+    --card-foreground: 215 28% 17%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 28% 17%;
+    --primary: 218 100% 73%; /* #74A9FF */
+    --primary-foreground: 215 28% 17%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 180 100% 50%; /* #00FFFF */
+    --accent-foreground: 215 28% 17%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 218 100% 73%;
+    --radius: 1.125rem; /* 18px */
+
+    --chart-1: 218 100% 73%;
+    --chart-2: 180 100% 50%;
+  }
+
+  .dark {
+    --background: 232 47% 8%; /* #090A1E */
+    --foreground: 0 0% 100%; /* #FFFFFF */
+    --card: 230 67% 11%; /* #0B122E */
+    --card-foreground: 0 0% 100%;
+    --popover: 230 67% 11%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 201 88% 49%; /* #10A8EA */
+    --primary-foreground: 232 47% 8%;
+    --secondary: 215 28% 27%; /* #31415f - Muted blue */
+    --secondary-foreground: 210 20% 90%; /* #dde1e7 */
+    --muted: 220 27% 20%; /* #1F2F53 */
+    --muted-foreground: 212 18% 73%; /* #B0B8C1 */
+    --accent: 201 88% 49%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 100% 60%; /* #FF3B3B */
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 27% 20%; /* #1F2F53 at full opacity */
+    --input: 220 27% 20%;
+    --ring: 201 88% 49%;
+
+    --chart-1: 201 88% 49%; /* #10A8EA */
+    --chart-2: 195 100% 68%; /* #5FE4FF */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+}
+
+@layer components {
+  /* Main card style with border, background, and shadows */
+  .elevated-card {
+    @apply relative overflow-hidden rounded-3xl border bg-card;
+    box-shadow: 0 6px 18px rgba(16, 168, 234, 0.08), 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .elevated-card {
+    box-shadow: 0 6px 18px rgba(16, 168, 234, 0.08), 0 2px 8px rgba(0, 0, 0, 0.45);
+  }
+
+  /* Inner highlights for card depth */
+  .elevated-card::before {
+    content: '';
+    @apply absolute top-0 left-0 w-full h-full pointer-events-none;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 50%);
+  }
+
+  .dark .elevated-card::before {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 50%);
+  }
+
+  /* Main CTA button style */
+  .primary-button {
+    @apply h-12 px-6 rounded-full text-white font-semibold;
+    background: linear-gradient(180deg, #10A8EA, #1F6FCD);
+    box-shadow: 0 0 24px rgba(16, 168, 234, 0.35);
+    transition: all 0.2s ease-in-out;
+  }
+  .primary-button:hover {
+    box-shadow: 0 0 32px rgba(16, 168, 234, 0.5);
+    transform: translateY(-1px);
+  }
+}
+
+/* Wave animation for login page */
+@keyframes move-forever {
+  0% {
+    transform: translate3d(-90px, 0, 0);
+  }
+  100% {
+    transform: translate3d(85px, 0, 0);
+  }
+}
+
+.waves {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 15vh;
+  margin-bottom: -7px; /* Fix for safari gap */
+  min-height: 100px;
+  max-height: 150px;
+}
+
+/* Animation */
+.parallax > use {
+  animation: move-forever 25s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
+}
+.parallax > use:nth-child(1) {
+  animation-delay: -2s;
+  animation-duration: 7s;
+}
+.parallax > use:nth-child(2) {
+  animation-delay: -3s;
+  animation-duration: 10s;
+}
+.parallax > use:nth-child(3) {
+  animation-delay: -4s;
+  animation-duration: 13s;
+}
+.parallax > use:nth-child(4) {
+  animation-delay: -5s;
+  animation-duration: 20s;
+}
