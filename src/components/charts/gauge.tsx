@@ -10,7 +10,7 @@ interface GaugeProps {
 
 const MAX_VALUE = 10; // L/min
 
-export function Gauge({ value }: GaugeProps) {
+function GaugeComponent({ value }: GaugeProps) {
   const percentage = Math.min(Math.max(value / MAX_VALUE, 0), 1);
   const rotation = percentage * 180 - 90;
 
@@ -57,3 +57,5 @@ export function Gauge({ value }: GaugeProps) {
     </div>
   );
 }
+
+export const Gauge = React.memo(GaugeComponent);
