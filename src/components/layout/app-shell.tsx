@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useUserProfile } from '@/context/user-profile-context';
 
 const navItems = [
   { href: '/dashboard', label: 'Home', icon: Home },
@@ -70,6 +71,17 @@ function DesktopSidebar() {
   );
 }
 
+function UserAvatar() {
+  const { avatarSrc } = useUserProfile();
+  return (
+    <Avatar>
+      <AvatarImage src={avatarSrc} data-ai-hint="user avatar" />
+      <AvatarFallback>JD</AvatarFallback>
+    </Avatar>
+  );
+}
+
+
 function MobileHeader() {
     return (
         <header className="md:hidden sticky top-0 z-30 flex h-16 items-center justify-between gap-4 bg-background/80 px-4 backdrop-blur-sm border-b border-border shrink-0">
@@ -85,10 +97,7 @@ function MobileHeader() {
            <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="rounded-full">
-                  <Avatar>
-                    <AvatarImage src="https://placehold.co/32x32.png" data-ai-hint="user avatar" />
-                    <AvatarFallback>JD</AvatarFallback>
-                  </Avatar>
+                  <UserAvatar />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -157,10 +166,7 @@ function DesktopHeader() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
                <Button variant="ghost" size="icon" className="rounded-full">
-                  <Avatar>
-                    <AvatarImage src="https://placehold.co/32x32.png" data-ai-hint="user avatar" />
-                    <AvatarFallback>JD</AvatarFallback>
-                  </Avatar>
+                  <UserAvatar />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">

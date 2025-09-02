@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useEffect, type ChangeEvent } from 'react';
+import { type ChangeEvent } from 'react';
 import {
   Card,
   CardContent,
@@ -15,34 +15,20 @@ import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useUserProfile } from '@/context/user-profile-context';
 
 
 export default function ProfilePage() {
     const { toast } = useToast();
-    const [avatarSrc, setAvatarSrc] = useState('https://placehold.co/80x80.png');
+    const { avatarSrc, setAvatarSrc } = useUserProfile();
 
     const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             const newSrc = URL.createObjectURL(file);
-            
-            // Clean up old object URL to prevent memory leaks
-            if (avatarSrc.startsWith('blob:')) {
-                URL.revokeObjectURL(avatarSrc);
-            }
-
             setAvatarSrc(newSrc);
         }
     };
-
-    // Clean up the object URL when the component unmounts
-    useEffect(() => {
-        return () => {
-            if (avatarSrc.startsWith('blob:')) {
-                URL.revokeObjectURL(avatarSrc);
-            }
-        };
-    }, [avatarSrc]);
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
