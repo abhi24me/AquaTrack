@@ -1,5 +1,6 @@
 
 'use client';
+import { useState, useEffect, type ChangeEvent } from 'react';
 import {
   Card,
   CardContent,
@@ -18,6 +19,30 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function ProfilePage() {
     const { toast } = useToast();
+    const [avatarSrc, setAvatarSrc] = useState('https://placehold.co/80x80.png');
+
+    const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            const newSrc = URL.createObjectURL(file);
+            
+            // Clean up old object URL to prevent memory leaks
+            if (avatarSrc.startsWith('blob:')) {
+                URL.revokeObjectURL(avatarSrc);
+            }
+
+            setAvatarSrc(newSrc);
+        }
+    };
+
+    // Clean up the object URL when the component unmounts
+    useEffect(() => {
+        return () => {
+            if (avatarSrc.startsWith('blob:')) {
+                URL.revokeObjectURL(avatarSrc);
+            }
+        };
+    }, [avatarSrc]);
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -33,15 +58,25 @@ export default function ProfilePage() {
         <CardContent className="space-y-6">
             <div className="flex items-center gap-4">
                 <Avatar className="h-20 w-20">
-                    <AvatarImage src="https://placehold.co/80x80.png" data-ai-hint="user avatar" />
+                    <AvatarImage src={avatarSrc} data-ai-hint="user avatar" />
                     <AvatarFallback>JD</AvatarFallback>
                 </Avatar>
                 <div className="relative">
-                    <Button variant="outline" size="sm">
-                        <Camera className="mr-2 h-4 w-4" />
-                        Change Avatar
-                    </Button>
-                    <Input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" id="avatar-upload"/>
+                    <Label htmlFor="avatar-upload">
+                        <Button variant="outline" size="sm" asChild>
+                            <span className="cursor-pointer">
+                                <Camera className="mr-2 h-4 w-4" />
+                                Change Avatar
+                            </span>
+                        </Button>
+                    </Label>
+                    <Input 
+                        type="file" 
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer sr-only" 
+                        id="avatar-upload"
+                        accept="image/png, image/jpeg, image/gif"
+                        onChange={handleAvatarChange}
+                    />
                 </div>
             </div>
           <div className="space-y-2">
