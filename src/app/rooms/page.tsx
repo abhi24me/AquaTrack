@@ -1,6 +1,5 @@
-
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import {
   Accordion,
   AccordionContent,
@@ -35,46 +34,46 @@ const OptimizedLineChart = dynamic(
 
 type Timeframe = 'Today' | 'Week' | 'Month' | 'Year';
 
-// SpeechRecognition API might not be available on all browsers/environments
-let SpeechRecognition: any;
-if (typeof window !== 'undefined') {
-  SpeechRecognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
-}
-
 export default function RoomsPage() {
   const [timeframe, setTimeframe] = useState<Timeframe>('Today');
   const [searchQuery, setSearchQuery] = useState('');
   const [isListening, setIsListening] = useState(false);
-  const recognition = useMemo(
-    () => (SpeechRecognition ? new SpeechRecognition() : null),
-    []
-  );
+  const [isClient, setIsClient] = useState(false);
+  
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
-    if (!recognition) return;
+    setIsClient(true);
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    recognition.continuous = false;
-    recognition.lang = 'en-US';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
 
-    recognition.onresult = (event: any) => {
-      const transcript = event.results[0][0].transcript;
-      setSearchQuery(transcript);
-    };
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setSearchQuery(transcript);
+      };
 
-    recognition.onerror = (event: any) => {
-      console.error('Speech recognition error:', event.error);
-      setIsListening(false);
-    };
+      recognition.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+      };
 
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-  }, [recognition]);
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+      
+      recognitionRef.current = recognition;
+    }
+  }, []);
 
   const handleVoiceSearch = () => {
+    const recognition = recognitionRef.current;
     if (!recognition) return;
     if (isListening) {
       recognition.stop();
@@ -127,7 +126,7 @@ export default function RoomsPage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        {recognition && (
+        {isClient && recognitionRef.current && (
           <Button
             size="icon"
             variant="ghost"
