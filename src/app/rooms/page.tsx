@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import {
@@ -93,7 +94,7 @@ export default function RoomsPage() {
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:space-y-6 md:p-8">
       <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-        <div>
+        <div className="w-full">
           <h2 className="text-3xl font-bold tracking-tight">Room Monitoring</h2>
           <p className="text-muted-foreground">
             Search, view, and manage all your rooms.
@@ -117,7 +118,7 @@ export default function RoomsPage() {
           ))}
         </div>
       </div>
-      <div className="relative w-full max-w-lg">
+      <div className="relative w-full max-w-full md:max-w-lg">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           type="search"
