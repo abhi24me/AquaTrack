@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Accordion,
   AccordionContent,
@@ -18,7 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { History, Mic, Search } from 'lucide-react';
+import { History, Search } from 'lucide-react';
 import { roomsData } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
@@ -38,51 +38,6 @@ type Timeframe = 'Today' | 'Week' | 'Month' | 'Year';
 export default function RoomsPage() {
   const [timeframe, setTimeframe] = useState<Timeframe>('Today');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isListening, setIsListening] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-  
-  const recognitionRef = useRef<any>(null);
-
-  useEffect(() => {
-    setIsClient(true);
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.lang = 'en-US';
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setSearchQuery(transcript);
-      };
-
-      recognition.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
-        setIsListening(false);
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-      
-      recognitionRef.current = recognition;
-    }
-  }, []);
-
-  const handleVoiceSearch = () => {
-    const recognition = recognitionRef.current;
-    if (!recognition) return;
-    if (isListening) {
-      recognition.stop();
-    } else {
-      recognition.start();
-      setIsListening(true);
-    }
-  };
 
   const filteredRooms = useMemo(() => {
     if (!searchQuery) return roomsData;
@@ -123,24 +78,10 @@ export default function RoomsPage() {
         <Input
           type="search"
           placeholder="Search rooms..."
-          className="w-full rounded-full bg-muted pl-10 pr-12 h-11"
+          className="w-full rounded-full bg-muted pl-10 h-11"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-        {isClient && recognitionRef.current && (
-          <Button
-            size="icon"
-            variant="ghost"
-            className={cn(
-              'absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full',
-              isListening && 'bg-destructive/20 text-destructive'
-            )}
-            onClick={handleVoiceSearch}
-            aria-label="Search by voice"
-          >
-            <Mic className="h-4 w-4" />
-          </Button>
-        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
