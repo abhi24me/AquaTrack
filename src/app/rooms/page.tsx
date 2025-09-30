@@ -66,6 +66,7 @@ export default function RoomsPage() {
 
     recognition.onerror = (event: any) => {
       console.error('Speech recognition error:', event.error);
+      setIsListening(false);
     };
 
     recognition.onend = () => {
@@ -74,11 +75,11 @@ export default function RoomsPage() {
   }, [recognition]);
 
   const handleVoiceSearch = () => {
+    if (!recognition) return;
     if (isListening) {
-      recognition?.stop();
-      setIsListening(false);
+      recognition.stop();
     } else {
-      recognition?.start();
+      recognition.start();
       setIsListening(true);
     }
   };
@@ -135,6 +136,7 @@ export default function RoomsPage() {
               isListening && 'bg-destructive/20 text-destructive'
             )}
             onClick={handleVoiceSearch}
+            aria-label="Search by voice"
           >
             <Mic className="h-4 w-4" />
           </Button>
@@ -202,7 +204,7 @@ export default function RoomsPage() {
           </Card>
         ))}
       </div>
-      {filteredRooms.length === 0 && (
+      {filteredRooms.length === 0 && searchQuery && (
         <div className="text-center py-10">
           <p className="text-lg font-semibold text-muted-foreground">
             No rooms found for &quot;{searchQuery}&quot;
