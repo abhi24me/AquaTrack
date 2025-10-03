@@ -38,9 +38,9 @@ type Timeframe = 'Today' | 'Week' | 'Month' | 'Year';
 interface Room {
   id: number;
   room: string;
-  total_usage: number;
-  daily_usage: number;
-  last_updated: string;
+  totalLitres: number;
+  dailyUsage: number;
+  created_at: string;
   status: 'OK' | 'Leak Detected';
 }
 
@@ -53,10 +53,10 @@ export default function RoomsPage() {
   useEffect(() => {
     const fetchRooms = async () => {
       setLoading(true);
-      const { data, error } = await supabase.from('usage').select('*');
+      const { data, error } = await supabase.from('Usage').select('*');
 
       if (error) {
-        console.error('Error fetching rooms:', error);
+        console.error('Error fetching rooms:', error.message);
       } else {
         const processedData = data.map(item => ({
           ...item,
@@ -73,7 +73,7 @@ export default function RoomsPage() {
       .channel('realtime-rooms')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'usage' },
+        { event: '*', schema: 'public', table: 'Usage' },
         (payload) => {
           console.log('Change received!', payload);
           fetchRooms(); // Refetch all data on any change
@@ -170,11 +170,11 @@ export default function RoomsPage() {
                 <div className="flex justify-around text-center">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Usage</p>
-                    <p className="text-2xl font-bold">{room.total_usage} L</p>
+                    <p className="text-2xl font-bold">{room.totalLitres} L</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Daily Usage</p>
-                    <p className="text-2xl font-bold">{room.daily_usage} L</p>
+                    <p className="text-2xl font-bold">{room.dailyUsage} L</p>
                   </div>
                 </div>
 

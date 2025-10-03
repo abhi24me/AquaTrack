@@ -61,22 +61,22 @@ export default function Home() {
   useEffect(() => {
     const fetchUsageData = async () => {
       setLoading(true);
-      const { data, error } = await supabase.from('usage').select('*');
+      const { data, error } = await supabase.from('Usage').select('*');
 
       if (error) {
-        console.error('Error fetching usage data:', error);
+        console.error('Error fetching usage data:', error.message);
         setLoading(false);
         return;
       }
 
-      const totalUsage = data.reduce((acc, room) => acc + room.total_usage, 0);
-      const totalDailyUsage = data.reduce((acc, room) => acc + room.daily_usage, 0);
+      const totalUsage = data.reduce((acc, room) => acc + room.totalLitres, 0);
+      const totalDailyUsage = data.reduce((acc, room) => acc + room.dailyUsage, 0);
       const avgDailyFlow = totalDailyUsage / (data.length || 1) / 24 / 60;
 
       const roomUsage: RoomUsage[] = data
         .map(room => ({
           name: room.room,
-          usage: room.daily_usage,
+          usage: room.dailyUsage,
         }))
         .sort((a, b) => b.usage - a.usage);
 
@@ -99,7 +99,7 @@ export default function Home() {
       .channel('realtime-usage')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'usage' },
+        { event: '*', schema: 'public', table: 'Usage' },
         () => {
           fetchUsageData();
         }
@@ -375,4 +375,3 @@ export default function Home() {
     </div>
   );
 }
-
