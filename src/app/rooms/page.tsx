@@ -19,7 +19,6 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { History, Search } from 'lucide-react';
-import { roomsData } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -62,17 +61,7 @@ export default function RoomsPage() {
         // Assume status based on some logic for now
         const processedData = data.map(item => ({
           ...item,
-          name: item.room,
-          dailyUsage: item.daily_usage,
-          flow: 0, // Placeholder
-          notifications: true, // Placeholder
           status: 'OK', // Placeholder
-          historical: { // Placeholder data, as it's not in the DB yet
-            Today: [],
-            Week: [],
-            Month: [],
-            Year: []
-          }
         }))
         setRooms(processedData);
       }

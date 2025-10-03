@@ -1,4 +1,3 @@
-
 import { Droplets, BarChart } from 'lucide-react';
 import { AlertTriangle, FileText } from 'lucide-react';
 
@@ -60,40 +59,40 @@ export const quickStatsData = {
 export const roomUsageData = {
   Today: [
     { name: 'Room 101', usage: 450 },
-    { name: 'Kitchen', usage: 320 },
-    { name: 'Restroom L1', usage: 210 },
-    { name: 'Lobby', usage: 150 },
-    { name: 'Gym', usage: 120 },
+    { name: 'Room 102', usage: 320 },
+    { name: 'Room 103', usage: 210 },
+    { name: 'Room 104', usage: 150 },
+    { name: 'Room 105', usage: 120 },
   ],
   Week: [
     { name: 'Room 101', usage: 3150 },
-    { name: 'Kitchen', usage: 2240 },
-    { name: 'Restroom L1', usage: 1470 },
-    { name: 'Lobby', usage: 1050 },
-    { name: 'Gym', usage: 840 },
+    { name: 'Room 102', usage: 2240 },
+    { name: 'Room 103', usage: 1470 },
+    { name: 'Room 104', usage: 1050 },
+    { name: 'Room 105', usage: 840 },
   ],
   Month: [
     { name: 'Room 101', usage: 12600 },
-    { name: 'Kitchen', usage: 8960 },
-    { name: 'Restroom L1', usage: 5880 },
-    { name: 'Lobby', usage: 4200 },
-    { name: 'Gym', usage: 3360 },
+    { name: 'Room 102', usage: 8960 },
+    { name: 'Room 103', usage: 5880 },
+    { name: 'Room 104', usage: 4200 },
+    { name: 'Room 105', usage: 3360 },
   ],
   Year: [
     { name: 'Room 101', usage: 151200 },
-    { name: 'Kitchen', usage: 107520 },
-    { name: 'Restroom L1', usage: 70560 },
-    { name: 'Lobby', usage: 50400 },
-    { name: 'Gym', usage: 40320 },
+    { name: 'Room 102', usage: 107520 },
+    { name: 'Room 103', usage: 70560 },
+    { name: 'Room 104', usage: 50400 },
+    { name: 'Room 105', usage: 40320 },
   ],
 };
 
 // --- Usage Summary (Highest/Lowest) ---
 export const usageSummaryData = {
-  Today: { highest: { name: 'Room 101', usage: 450 }, lowest: { name: 'Gym', usage: 120 } },
-  Week: { highest: { name: 'Room 101', usage: 3150 }, lowest: { name: 'Gym', usage: 840 } },
-  Month: { highest: { name: 'Room 101', usage: 12600 }, lowest: { name: 'Gym', usage: 3360 } },
-  Year: { highest: { name: 'Room 101', usage: 151200 }, lowest: { name: 'Gym', usage: 40320 } },
+  Today: { highest: { name: 'Room 101', usage: 450 }, lowest: { name: 'Room 105', usage: 120 } },
+  Week: { highest: { name: 'Room 101', usage: 3150 }, lowest: { name: 'Room 105', usage: 840 } },
+  Month: { highest: { name: 'Room 101', usage: 12600 }, lowest: { name: 'Room 105', usage: 3360 } },
+  Year: { highest: { name: 'Room 101', usage: 151200 }, lowest: { name: 'Room 105', usage: 40320 } },
 };
 
 
@@ -115,7 +114,7 @@ export const roomsData = [
     },
     {
         id: 2,
-        name: 'Kitchen',
+        name: 'Room 102',
         status: 'OK',
         flow: 0,
         dailyUsage: 320,
@@ -129,7 +128,7 @@ export const roomsData = [
     },
     {
         id: 3,
-        name: 'Restroom L1',
+        name: 'Room 103',
         status: 'OK',
         flow: 0,
         dailyUsage: 210,
@@ -145,7 +144,7 @@ export const roomsData = [
 
 export const activeAlerts = [
   { room: 'Room 101', message: 'Continuous flow of 5.1 L/hr detected.' },
-  { room: 'Kitchen', message: 'Daily usage threshold of 300L exceeded.' },
+  { room: 'Room 102', message: 'Daily usage threshold of 300L exceeded.' },
 ];
 
 // --- Notifications Data (Remains Static for now) ---
@@ -162,7 +161,7 @@ export const notificationsData = [
     id: 2,
     icon: Droplets,
     title: 'High Usage Alert',
-    description: 'Kitchen has exceeded its daily threshold of 300 L.',
+    description: 'Room 102 has exceeded its daily threshold of 300 L.',
     time: '1 hour ago',
     variant: 'default',
   },
@@ -178,7 +177,7 @@ export const notificationsData = [
     id: 4,
     icon: AlertTriangle,
     title: 'Tap Left Open',
-    description: 'A tap in Restroom L1 was left open and has been automatically shut off.',
+    description: 'A tap in Room 103 was left open and has been automatically shut off.',
     time: 'Yesterday',
     variant: 'default',
   },
