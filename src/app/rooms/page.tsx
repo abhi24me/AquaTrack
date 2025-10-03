@@ -58,17 +58,33 @@ export default function RoomsPage() {
       if (error) {
         console.error('Error fetching rooms:', error);
       } else {
-        // Assume status based on some logic for now
         const processedData = data.map(item => ({
           ...item,
-          status: 'OK', // Placeholder
-        }))
+          status: 'OK', 
+        }));
         setRooms(processedData);
       }
       setLoading(false);
     };
 
     fetchRooms();
+
+    const channel = supabase
+      .channel('realtime-rooms')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'usage' },
+        (payload) => {
+          console.log('Change received!', payload);
+          fetchRooms(); // Refetch all data on any change
+        }
+      )
+      .subscribe();
+      
+    // Cleanup subscription on component unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const filteredRooms = useMemo(() => {
