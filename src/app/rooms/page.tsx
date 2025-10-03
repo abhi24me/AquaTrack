@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Accordion,
   AccordionContent,
@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
+import { supabase } from '@/lib/supabase';
 
 const OptimizedLineChart = dynamic(
   () => import('@/components/charts/optimized-line-chart'),
@@ -35,16 +36,58 @@ const OptimizedLineChart = dynamic(
 
 type Timeframe = 'Today' | 'Week' | 'Month' | 'Year';
 
+interface Room {
+  id: number;
+  room: string;
+  total_usage: number;
+  daily_usage: number;
+  last_updated: string;
+  status: 'OK' | 'Leak Detected';
+}
+
 export default function RoomsPage() {
   const [timeframe, setTimeframe] = useState<Timeframe>('Today');
   const [searchQuery, setSearchQuery] = useState('');
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      setLoading(true);
+      const { data, error } = await supabase.from('usage').select('*');
+
+      if (error) {
+        console.error('Error fetching rooms:', error);
+      } else {
+        // Assume status based on some logic for now
+        const processedData = data.map(item => ({
+          ...item,
+          name: item.room,
+          dailyUsage: item.daily_usage,
+          flow: 0, // Placeholder
+          notifications: true, // Placeholder
+          status: 'OK', // Placeholder
+          historical: { // Placeholder data, as it's not in the DB yet
+            Today: [],
+            Week: [],
+            Month: [],
+            Year: []
+          }
+        }))
+        setRooms(processedData);
+      }
+      setLoading(false);
+    };
+
+    fetchRooms();
+  }, []);
 
   const filteredRooms = useMemo(() => {
-    if (!searchQuery) return roomsData;
-    return roomsData.filter((room) =>
-      room.name.toLowerCase().includes(searchQuery.toLowerCase())
+    if (!searchQuery) return rooms;
+    return rooms.filter((room) =>
+      room.room.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, rooms]);
 
   return (
     <div className="flex-1 space-y-4 p-4 pt-6 md:space-y-6 md:p-8">
@@ -84,71 +127,86 @@ export default function RoomsPage() {
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-        {filteredRooms.map((room) => (
-          <Card key={room.id} className="elevated-card">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>{room.name}</CardTitle>
-                <Badge
-                  variant={room.status === 'OK' ? 'secondary' : 'destructive'}
-                  className={cn(
-                    room.status === 'OK' && 'border-green-500/50 text-green-600'
-                  )}
-                >
-                  {room.status}
-                </Badge>
-              </div>
-              <CardDescription>Live water usage and controls</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-around text-center">
-                <div>
-                  <p className="text-sm text-muted-foreground">Live Flow</p>
-                  <p className="text-2xl font-bold">{room.flow} L/min</p>
+      {loading ? (
+         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
+                <Card key={i} className="elevated-card">
+                    <CardHeader>
+                        <Skeleton className="h-6 w-1/2" />
+                        <Skeleton className="h-4 w-3/4" />
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Skeleton className="h-12 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                    </CardContent>
+                </Card>
+            ))}
+         </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+          {filteredRooms.map((room) => (
+            <Card key={room.id} className="elevated-card">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>{room.room}</CardTitle>
+                  <Badge
+                    variant={room.status === 'OK' ? 'secondary' : 'destructive'}
+                    className={cn(
+                      room.status === 'OK' && 'border-green-500/50 text-green-600'
+                    )}
+                  >
+                    {room.status}
+                  </Badge>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Daily Usage</p>
-                  <p className="text-2xl font-bold">{room.dailyUsage} L</p>
+                <CardDescription>Live water usage and controls</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-around text-center">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Usage</p>
+                    <p className="text-2xl font-bold">{room.total_usage} L</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Daily Usage</p>
+                    <p className="text-2xl font-bold">{room.daily_usage} L</p>
+                  </div>
                 </div>
-              </div>
 
-              <Accordion type="single" collapsible>
-                <AccordionItem value="item-1">
-                  <AccordionTrigger>
-                    <div className="flex items-center gap-2">
-                      <History className="h-4 w-4" />
-                      Historical Data ({timeframe})
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="relative h-48 w-full">
-                      <OptimizedLineChart
-                        dataKey="usage"
-                        data={room.historical[timeframe]}
-                      />
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+                <Accordion type="single" collapsible>
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger>
+                      <div className="flex items-center gap-2">
+                        <History className="h-4 w-4" />
+                        Historical Data ({timeframe})
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="relative h-48 w-full">
+                        <p className="text-muted-foreground text-center text-sm">Historical data not yet available from database.</p>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
 
-              <div className="flex items-center justify-between rounded-lg border p-3">
-                <Label htmlFor={`notif-switch-${room.id}`}>
-                  Notifications
-                </Label>
-                <Switch
-                  id={`notif-switch-${room.id}`}
-                  defaultChecked={room.notifications}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      {filteredRooms.length === 0 && searchQuery && (
+                <div className="flex items-center justify-between rounded-lg border p-3">
+                  <Label htmlFor={`notif-switch-${room.id}`}>
+                    Notifications
+                  </Label>
+                  <Switch
+                    id={`notif-switch-${room.id}`}
+                    defaultChecked={true}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+      {!loading && filteredRooms.length === 0 && (
         <div className="text-center py-10">
           <p className="text-lg font-semibold text-muted-foreground">
-            No rooms found for &quot;{searchQuery}&quot;
+            {searchQuery ? `No rooms found for "${searchQuery}"` : "No rooms found in the database."}
           </p>
         </div>
       )}
