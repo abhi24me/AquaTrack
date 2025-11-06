@@ -69,14 +69,14 @@ export default function Home() {
         return;
       }
 
-      const totalUsage = data.reduce((acc, room) => acc + room.totalLitres, 0);
-      const totalDailyUsage = data.reduce((acc, room) => acc + room.dailyUsage, 0);
+      const totalUsage = data.reduce((acc, room) => acc + room.totallitres, 0);
+      const totalDailyUsage = data.reduce((acc, room) => acc + room.dailyusage, 0);
       const avgDailyFlow = totalDailyUsage / (data.length || 1) / 24 / 60;
 
       const roomUsage: RoomUsage[] = data
         .map(room => ({
           name: room.room,
-          usage: room.dailyUsage,
+          usage: room.dailyusage,
         }))
         .sort((a, b) => b.usage - a.usage);
 
@@ -375,5 +375,3 @@ export default function Home() {
     </div>
   );
 }
-
-    

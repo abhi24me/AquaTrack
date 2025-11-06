@@ -38,8 +38,8 @@ type Timeframe = 'Today' | 'Week' | 'Month' | 'Year';
 interface Room {
   id: number;
   room: string;
-  totalLitres: number;
-  dailyUsage: number;
+  totallitres: number;
+  dailyusage: number;
   created_at: string;
   status: 'OK' | 'Leak Detected';
 }
@@ -170,11 +170,11 @@ export default function RoomsPage() {
                 <div className="flex justify-around text-center">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Usage</p>
-                    <p className="text-2xl font-bold">{room.totalLitres} L</p>
+                    <p className="text-2xl font-bold">{room.totallitres} L</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Daily Usage</p>
-                    <p className="text-2xl font-bold">{room.dailyUsage} L</p>
+                    <p className="text-2xl font-bold">{room.dailyusage} L</p>
                   </div>
                 </div>
 
@@ -218,5 +218,3 @@ export default function RoomsPage() {
     </div>
   );
 }
-
-    
