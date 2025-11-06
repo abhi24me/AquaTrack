@@ -64,7 +64,7 @@ export default function Home() {
       const { data, error } = await supabase.from('usage').select('*');
 
       if (error) {
-        console.error('Error fetching usage data:', error.message);
+        console.error('Error fetching usage data:', error.message || error);
         setLoading(false);
         return;
       }
