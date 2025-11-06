@@ -61,7 +61,7 @@ export default function Home() {
   useEffect(() => {
     const fetchUsageData = async () => {
       setLoading(true);
-      const { data, error } = await supabase.from('usage').select('*');
+      const { data, error } = await supabase.from('Usage').select('*');
 
       if (error) {
         console.error('Error fetching usage data:', error.message);
@@ -99,7 +99,7 @@ export default function Home() {
       .channel('realtime-usage')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'usage' },
+        { event: '*', schema: 'public', table: 'Usage' },
         () => {
           fetchUsageData();
         }
