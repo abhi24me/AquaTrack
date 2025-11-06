@@ -53,7 +53,7 @@ export default function RoomsPage() {
   useEffect(() => {
     const fetchRooms = async () => {
       setLoading(true);
-      const { data, error } = await supabase.from('Usage').select('*');
+      const { data, error } = await supabase.from('usage').select('*');
 
       if (error) {
         console.error('Error fetching rooms:', error.message);
@@ -73,7 +73,7 @@ export default function RoomsPage() {
       .channel('realtime-rooms')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'Usage' },
+        { event: '*', schema: 'public', table: 'usage' },
         (payload) => {
           console.log('Change received!', payload);
           fetchRooms(); // Refetch all data on any change
