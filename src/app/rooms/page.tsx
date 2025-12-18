@@ -39,7 +39,7 @@ interface Room {
   id: number;
   room_number: string;
   daily_usage: number;
-  total_usage: number; // This might need to come from a different query or be calculated over time
+  total_usage: number; 
   status: 'OK' | 'Leak Detected';
 }
 
@@ -51,10 +51,6 @@ export default function RoomsPage() {
 
   const fetchRooms = async () => {
     setLoading(true);
-    // This query is a bit complex for Supabase client-side library due to multiple joins and aggregations.
-    // A database function (RPC) would be more efficient here.
-    // For now, we'll fetch data and join it in the application code.
-
     // 1. Fetch all rooms
     const { data: roomsData, error: roomsError } = await supabase
       .from('rooms')
@@ -76,6 +72,7 @@ export default function RoomsPage() {
       setLoading(false);
       return;
     }
+    const deviceIds = devicesData.map(d => d.id);
 
     // 3. Fetch today's usage summary
     const localDate = new Date();
@@ -84,6 +81,7 @@ export default function RoomsPage() {
     const { data: summaryData, error: summaryError } = await supabase
       .from('daily_usage_summary')
       .select('device_id, daily_usage')
+      .in('device_id', deviceIds)
       .eq('date', today);
 
     if (summaryError) {
@@ -91,27 +89,49 @@ export default function RoomsPage() {
       setLoading(false);
       return;
     }
+    
+    // 4. Fetch total usage from water_usage_logs
+    const { data: totalUsageData, error: totalUsageError } = await supabase
+      .rpc('get_latest_device_usage', { p_device_ids: deviceIds });
 
-    // 4. Combine the data
-    const deviceUsageMap = new Map<number, number>();
+    if (totalUsageError) {
+        console.error('Error fetching total usage:', totalUsageError.message);
+        setLoading(false);
+        return;
+    }
+
+    // 5. Combine the data
+    const deviceDailyUsageMap = new Map<number, number>();
     for (const summary of summaryData) {
-      deviceUsageMap.set(summary.device_id, summary.daily_usage);
+      deviceDailyUsageMap.set(summary.device_id, summary.daily_usage);
     }
     
-    const roomUsageMap = new Map<number, number>();
-    for (const device of devicesData) {
-        const usage = deviceUsageMap.get(device.id) || 0;
-        const currentRoomUsage = roomUsageMap.get(device.room_id) || 0;
-        roomUsageMap.set(device.room_id, currentRoomUsage + usage);
+    const deviceTotalUsageMap = new Map<number, number>();
+    if (totalUsageData) {
+        for (const usage of totalUsageData) {
+            deviceTotalUsageMap.set(usage.device_id, usage.latest_total_usage);
+        }
     }
 
-    const processedRooms: Room[] = roomsData.map(room => ({
-        id: room.id,
-        room_number: room.room_number,
-        daily_usage: roomUsageMap.get(room.id) || 0,
-        total_usage: 0, // This needs a separate query on water_usage_logs, setting to 0 for now.
-        status: 'OK' // Leak detection logic would need a query on water_usage_logs
-    }));
+    const processedRooms: Room[] = roomsData.map(room => {
+        const devicesInRoom = devicesData.filter(d => d.room_id === room.id);
+        
+        const dailyUsage = devicesInRoom.reduce((acc, device) => {
+            return acc + (deviceDailyUsageMap.get(device.id) || 0);
+        }, 0);
+
+        const totalUsage = devicesInRoom.reduce((acc, device) => {
+            return acc + (deviceTotalUsageMap.get(device.id) || 0);
+        }, 0);
+
+        return {
+            id: room.id,
+            room_number: room.room_number,
+            daily_usage: dailyUsage,
+            total_usage: totalUsage,
+            status: 'OK' // Leak detection logic would need a query on water_usage_logs
+        }
+    });
 
     setRooms(processedRooms);
     setLoading(false);
@@ -120,15 +140,19 @@ export default function RoomsPage() {
   useEffect(() => {
     fetchRooms();
 
+    // The function `get_latest_device_usage` is a read-only RPC and won't trigger postgres_changes.
+    // We listen to inserts on the logs table, which is a good proxy for when totals might change.
     const channel = supabase
       .channel('realtime-rooms')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'daily_usage_summary' },
-        (payload) => {
-          console.log('Change received!', payload);
-          fetchRooms(); // Refetch all data on any change
-        }
+        () => fetchRooms()
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'water_usage_logs' },
+        () => fetchRooms()
       )
       .subscribe();
       
@@ -221,11 +245,11 @@ export default function RoomsPage() {
                 <div className="flex justify-around text-center">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Usage</p>
-                    <p className="text-2xl font-bold">{room.total_usage} L</p>
+                    <p className="text-2xl font-bold">{room.total_usage.toFixed(2)} L</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Daily Usage</p>
-                    <p className="text-2xl font-bold">{room.daily_usage} L</p>
+                    <p className="text-2xl font-bold">{room.daily_usage.toFixed(2)} L</p>
                   </div>
                 </div>
 
@@ -269,3 +293,5 @@ export default function RoomsPage() {
     </div>
   );
 }
+
+    
