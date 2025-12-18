@@ -58,48 +58,89 @@ export default function Home() {
   const lastUpdateTime = useRef(Date.now());
   const targetFlowRate = useRef(2.3);
 
-  useEffect(() => {
-    const fetchUsageData = async () => {
-      setLoading(true);
-      const { data, error } = await supabase.from('usage').select('*');
+  const fetchUsageData = async () => {
+    setLoading(true);
+    // 1. Fetch all rooms
+    const { data: roomsData, error: roomsError } = await supabase
+      .from('rooms')
+      .select('id, room_number');
 
-      if (error) {
-        console.error('Error fetching usage data:', error.message || error);
-        setLoading(false);
-        return;
-      }
-
-      const totalUsage = data.reduce((acc, room) => acc + room.totallitres, 0);
-      const totalDailyUsage = data.reduce((acc, room) => acc + room.dailyusage, 0);
-      const avgDailyFlow = totalDailyUsage / (data.length || 1) / 24 / 60;
-
-      const roomUsage: RoomUsage[] = data
-        .map(room => ({
-          name: room.room,
-          usage: room.dailyusage,
-        }))
-        .sort((a, b) => b.usage - a.usage);
-
-      const highestUsage = roomUsage[0] || { name: 'N/A', usage: 0 };
-      const lowestUsage = roomUsage[roomUsage.length - 1] || { name: 'N/A', usage: 0 };
-      
-      setUsageData({
-        totalUsage,
-        avgDailyFlow,
-        roomUsage,
-        highestUsage,
-        lowestUsage
-      });
+    if (roomsError) {
+      console.error('Error fetching rooms:', roomsError.message || roomsError);
       setLoading(false);
-    };
+      return;
+    }
 
+    // 2. Fetch all devices linked to those rooms
+    const roomIds = roomsData.map(r => r.id);
+    const { data: devicesData, error: devicesError } = await supabase
+      .from('devices')
+      .select('id, room_id')
+      .in('room_id', roomIds);
+
+    if (devicesError) {
+      console.error('Error fetching devices:', devicesError.message || devicesError);
+      setLoading(false);
+      return;
+    }
+
+    // 3. Fetch daily usage summary for today for all devices
+    const today = new Date().toISOString().split('T')[0];
+    const deviceIds = devicesData.map(d => d.id);
+    const { data: summaryData, error: summaryError } = await supabase
+      .from('daily_usage_summary')
+      .select('device_id, daily_usage')
+      .in('device_id', deviceIds)
+      .eq('date', today);
+    
+    if (summaryError) {
+      console.error('Error fetching usage summary:', summaryError.message || summaryError);
+      setLoading(false);
+      return;
+    }
+
+    // 4. Process and combine the data
+    const totalUsage = summaryData.reduce((acc, item) => acc + item.daily_usage, 0);
+
+    const roomUsageMap = new Map<string, number>();
+    for (const summary of summaryData) {
+      const device = devicesData.find(d => d.id === summary.device_id);
+      if (device) {
+        const room = roomsData.find(r => r.id === device.room_id);
+        if (room) {
+          const currentUsage = roomUsageMap.get(room.room_number) || 0;
+          roomUsageMap.set(room.room_number, currentUsage + summary.daily_usage);
+        }
+      }
+    }
+    
+    // Create usage data for all rooms, even if they have 0 usage
+    const roomUsage: RoomUsage[] = roomsData.map(room => ({
+        name: room.room_number,
+        usage: roomUsageMap.get(room.room_number) || 0,
+    })).sort((a,b) => b.usage - a.usage);
+
+    const highestUsage = roomUsage[0] || { name: 'N/A', usage: 0 };
+    const lowestUsage = roomUsage[roomUsage.length - 1] || { name: 'N/A', usage: 0 };
+    
+    setUsageData({
+      totalUsage,
+      avgDailyFlow: 0, // This would require querying water_usage_logs, setting to 0 for now.
+      roomUsage,
+      highestUsage,
+      lowestUsage
+    });
+    setLoading(false);
+  };
+  
+  useEffect(() => {
     fetchUsageData();
 
     const channel = supabase
-      .channel('realtime-usage')
+      .channel('realtime-dashboard')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'usage' },
+        { event: '*', schema: 'public', table: 'daily_usage_summary' },
         () => {
           fetchUsageData();
         }

@@ -37,10 +37,9 @@ type Timeframe = 'Today' | 'Week' | 'Month' | 'Year';
 
 interface Room {
   id: number;
-  room: string;
-  totallitres: number;
-  dailyusage: number;
-  created_at: string;
+  room_number: string;
+  daily_usage: number;
+  total_usage: number; // This might need to come from a different query or be calculated over time
   status: 'OK' | 'Leak Detected';
 }
 
@@ -50,30 +49,80 @@ export default function RoomsPage() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchRooms = async () => {
-      setLoading(true);
-      const { data, error } = await supabase.from('usage').select('*');
+  const fetchRooms = async () => {
+    setLoading(true);
+    // This query is a bit complex for Supabase client-side library due to multiple joins and aggregations.
+    // A database function (RPC) would be more efficient here.
+    // For now, we'll fetch data and join it in the application code.
 
-      if (error) {
-        console.error('Error fetching rooms:', error.message);
-      } else {
-        const processedData = data.map(item => ({
-          ...item,
-          status: 'OK', 
-        }));
-        setRooms(processedData);
-      }
+    // 1. Fetch all rooms
+    const { data: roomsData, error: roomsError } = await supabase
+      .from('rooms')
+      .select('id, room_number');
+
+    if (roomsError) {
+      console.error('Error fetching rooms:', roomsError.message);
       setLoading(false);
-    };
+      return;
+    }
 
+    // 2. Fetch all devices
+    const { data: devicesData, error: devicesError } = await supabase
+      .from('devices')
+      .select('id, room_id');
+
+    if (devicesError) {
+      console.error('Error fetching devices:', devicesError.message);
+      setLoading(false);
+      return;
+    }
+
+    // 3. Fetch today's usage summary
+    const today = new Date().toISOString().split('T')[0];
+    const { data: summaryData, error: summaryError } = await supabase
+      .from('daily_usage_summary')
+      .select('device_id, daily_usage')
+      .eq('date', today);
+
+    if (summaryError) {
+      console.error('Error fetching usage summary:', summaryError.message);
+      setLoading(false);
+      return;
+    }
+
+    // 4. Combine the data
+    const deviceUsageMap = new Map<number, number>();
+    for (const summary of summaryData) {
+      deviceUsageMap.set(summary.device_id, summary.daily_usage);
+    }
+    
+    const roomUsageMap = new Map<number, number>();
+    for (const device of devicesData) {
+        const usage = deviceUsageMap.get(device.id) || 0;
+        const currentRoomUsage = roomUsageMap.get(device.room_id) || 0;
+        roomUsageMap.set(device.room_id, currentRoomUsage + usage);
+    }
+
+    const processedRooms: Room[] = roomsData.map(room => ({
+        id: room.id,
+        room_number: room.room_number,
+        daily_usage: roomUsageMap.get(room.id) || 0,
+        total_usage: 0, // This needs a separate query on water_usage_logs, setting to 0 for now.
+        status: 'OK' // Leak detection logic would need a query on water_usage_logs
+    }));
+
+    setRooms(processedRooms);
+    setLoading(false);
+  };
+  
+  useEffect(() => {
     fetchRooms();
 
     const channel = supabase
       .channel('realtime-rooms')
       .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'usage' },
+        { event: '*', schema: 'public', table: 'daily_usage_summary' },
         (payload) => {
           console.log('Change received!', payload);
           fetchRooms(); // Refetch all data on any change
@@ -90,7 +139,7 @@ export default function RoomsPage() {
   const filteredRooms = useMemo(() => {
     if (!searchQuery) return rooms;
     return rooms.filter((room) =>
-      room.room.toLowerCase().includes(searchQuery.toLowerCase())
+      room.room_number.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [searchQuery, rooms]);
 
@@ -154,7 +203,7 @@ export default function RoomsPage() {
             <Card key={room.id} className="elevated-card">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>{room.room}</CardTitle>
+                  <CardTitle>{room.room_number}</CardTitle>
                   <Badge
                     variant={room.status === 'OK' ? 'secondary' : 'destructive'}
                     className={cn(
@@ -170,11 +219,11 @@ export default function RoomsPage() {
                 <div className="flex justify-around text-center">
                   <div>
                     <p className="text-sm text-muted-foreground">Total Usage</p>
-                    <p className="text-2xl font-bold">{room.totallitres} L</p>
+                    <p className="text-2xl font-bold">{room.total_usage} L</p>
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Daily Usage</p>
-                    <p className="text-2xl font-bold">{room.dailyusage} L</p>
+                    <p className="text-2xl font-bold">{room.daily_usage} L</p>
                   </div>
                 </div>
 
