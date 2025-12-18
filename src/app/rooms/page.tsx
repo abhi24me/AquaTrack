@@ -39,7 +39,7 @@ interface Room {
   id: number;
   room_number: string;
   daily_usage: number;
-  total_usage: number; 
+  total_usage: number;
   status: 'OK' | 'Leak Detected';
 }
 
@@ -89,13 +89,16 @@ export default function RoomsPage() {
       setLoading(false);
       return;
     }
-    
-    // 4. Fetch total usage from water_usage_logs
-    const { data: totalUsageData, error: totalUsageError } = await supabase
-      .rpc('get_latest_device_usage', { p_device_ids: deviceIds });
 
-    if (totalUsageError) {
-        console.error('Error fetching total usage:', totalUsageError.message);
+    // 4. Fetch the latest total_usage for each device from water_usage_logs
+    const { data: latestLogs, error: logsError } = await supabase
+      .from('water_usage_logs')
+      .select('device_id, total_usage')
+      .in('device_id', deviceIds)
+      .order('timestamp', { ascending: false });
+
+    if (logsError) {
+        console.error('Error fetching latest usage logs:', logsError.message);
         setLoading(false);
         return;
     }
@@ -107,11 +110,15 @@ export default function RoomsPage() {
     }
     
     const deviceTotalUsageMap = new Map<number, number>();
-    if (totalUsageData) {
-        for (const usage of totalUsageData) {
-            deviceTotalUsageMap.set(usage.device_id, usage.latest_total_usage);
+    if (latestLogs) {
+        // Since we ordered by timestamp descending, the first entry for each device_id is the latest.
+        for (const log of latestLogs) {
+            if (!deviceTotalUsageMap.has(log.device_id)) {
+                deviceTotalUsageMap.set(log.device_id, log.total_usage);
+            }
         }
     }
+
 
     const processedRooms: Room[] = roomsData.map(room => {
         const devicesInRoom = devicesData.filter(d => d.room_id === room.id);
@@ -140,8 +147,6 @@ export default function RoomsPage() {
   useEffect(() => {
     fetchRooms();
 
-    // The function `get_latest_device_usage` is a read-only RPC and won't trigger postgres_changes.
-    // We listen to inserts on the logs table, which is a good proxy for when totals might change.
     const channel = supabase
       .channel('realtime-rooms')
       .on(
