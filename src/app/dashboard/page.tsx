@@ -85,7 +85,9 @@ export default function Home() {
     }
 
     // 3. Fetch daily usage summary for today for all devices
-    const today = new Date().toISOString().split('T')[0];
+    const localDate = new Date();
+    const today = `${localDate.getFullYear()}-${String(localDate.getMonth() + 1).padStart(2, '0')}-${String(localDate.getDate()).padStart(2, '0')}`;
+    
     const deviceIds = devicesData.map(d => d.id);
     const { data: summaryData, error: summaryError } = await supabase
       .from('daily_usage_summary')
