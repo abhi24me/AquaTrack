@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -9,7 +10,6 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { notificationsData } from '@/lib/data';
 import { cn } from '@/lib/utils';
 import {
   Dialog,
@@ -30,12 +30,93 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, AlertCircle, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/lib/supabase';
+
+interface AlertItem {
+  id: number;
+  room_number: string | null;
+  message: string;
+  severity: 'Low' | 'Medium' | 'High' | 'Critical';
+  alert_type: string;
+  created_at: string;
+  status: string;
+  rooms?: { room_number: string };
+}
 
 export default function NotificationsPage() {
   const { toast } = useToast();
+  const [alerts, setAlerts] = useState<AlertItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchAlerts = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('alerts')
+      .select('*, rooms(room_number)')
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    if (error) {
+      console.error('Error fetching alerts:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch notifications.',
+        variant: 'destructive',
+      });
+    } else {
+      const formatted = data.map((item: any) => ({
+        ...item,
+        room_number: item.rooms?.room_number || 'General'
+      }));
+      setAlerts(formatted);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchAlerts();
+
+    // Realtime subscription
+    const channel = supabase
+      .channel('realtime-notifications')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'alerts' },
+        (payload) => {
+          console.log('New Alert:', payload);
+          toast({
+            title: 'New Alert',
+            description: payload.new.message,
+          });
+          fetchAlerts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const getIcon = (severity: string) => {
+    switch (severity) {
+      case 'Critical': return AlertTriangle;
+      case 'High': return AlertTriangle;
+      case 'Medium': return AlertCircle;
+      default: return CheckCircle;
+    }
+  };
+
+  const getVariant = (severity: string) => {
+    switch (severity) {
+      case 'Critical': return 'destructive';
+      case 'High': return 'destructive';
+      default: return 'default';
+    }
+  };
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
@@ -119,25 +200,34 @@ export default function NotificationsPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {notificationsData.map((notification) => (
-              <Alert
-                key={notification.id}
-                variant={notification.variant as 'default' | 'destructive'}
-              >
-                <notification.icon className="h-4 w-4" />
-                <div className="flex justify-between w-full">
-                  <div>
-                    <AlertTitle>{notification.title}</AlertTitle>
-                    <AlertDescription>
-                      {notification.description}
-                    </AlertDescription>
-                  </div>
-                  <p className="text-xs text-muted-foreground whitespace-nowrap">
-                    {notification.time}
-                  </p>
-                </div>
-              </Alert>
-            ))}
+            {loading ? (
+              <p className="text-muted-foreground text-sm">Loading alerts...</p>
+            ) : alerts.length === 0 ? (
+              <p className="text-muted-foreground text-sm">No recent alerts.</p>
+            ) : (
+              alerts.map((notification) => {
+                const Icon = getIcon(notification.severity);
+                return (
+                  <Alert
+                    key={notification.id}
+                    variant={getVariant(notification.severity) as 'default' | 'destructive'}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <div className="flex justify-between w-full">
+                      <div>
+                        <AlertTitle>{notification.alert_type} - {notification.room_number}</AlertTitle>
+                        <AlertDescription>
+                          {notification.message}
+                        </AlertDescription>
+                      </div>
+                      <p className="text-xs text-muted-foreground whitespace-nowrap ml-2">
+                        {new Date(notification.created_at).toLocaleString()}
+                      </p>
+                    </div>
+                  </Alert>
+                );
+              })
+            )}
           </div>
         </CardContent>
       </Card>

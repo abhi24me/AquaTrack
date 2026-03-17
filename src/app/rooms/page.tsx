@@ -41,6 +41,7 @@ interface Room {
   daily_usage: number;
   total_usage: number;
   status: 'OK' | 'Leak Detected';
+  history: { date: string, usage: number }[];
 }
 
 export default function RoomsPage() {
@@ -54,7 +55,7 @@ export default function RoomsPage() {
     // 1. Fetch all rooms
     const { data: roomsData, error: roomsError } = await supabase
       .from('rooms')
-      .select('id, room_number');
+      .select('id, room_number, buildings(name)');
 
     if (roomsError) {
       console.error('Error fetching rooms:', roomsError.message);
@@ -77,10 +78,10 @@ export default function RoomsPage() {
     // 3. Fetch today's usage summary
     const localDate = new Date();
     const today = `${localDate.getFullYear()}-${String(localDate.getMonth() + 1).padStart(2, '0')}-${String(localDate.getDate()).padStart(2, '0')}`;
-    
+
     const { data: summaryData, error: summaryError } = await supabase
       .from('daily_usage_summary')
-      .select('device_id, daily_usage')
+      .select('device_id, daily_usage, date')
       .in('device_id', deviceIds)
       .eq('date', today);
 
@@ -98,52 +99,93 @@ export default function RoomsPage() {
       .order('timestamp', { ascending: false });
 
     if (logsError) {
-        console.error('Error fetching latest usage logs:', logsError.message);
-        setLoading(false);
-        return;
+      console.error('Error fetching latest usage logs:', logsError.message);
+      setLoading(false);
+      return;
     }
 
-    // 5. Combine the data
+    // 5. Fetch Historical Data (Last 30 days for now, to support the graph)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const fromStr = thirtyDaysAgo.toISOString().split('T')[0];
+
+    const { data: historyData } = await supabase
+      .from('daily_usage_summary')
+      .select('device_id, daily_usage, date')
+      .in('device_id', deviceIds)
+      .gte('date', fromStr)
+      .order('date', { ascending: true });
+
+
+    // 6. Combine the data
     const deviceDailyUsageMap = new Map<number, number>();
-    for (const summary of summaryData) {
-      deviceDailyUsageMap.set(summary.device_id, summary.daily_usage);
-    }
-    
+    summaryData?.forEach(s => deviceDailyUsageMap.set(s.device_id, s.daily_usage));
+
     const deviceTotalUsageMap = new Map<number, number>();
     if (latestLogs) {
-        // Since we ordered by timestamp descending, the first entry for each device_id is the latest.
-        for (const log of latestLogs) {
-            if (!deviceTotalUsageMap.has(log.device_id)) {
-                deviceTotalUsageMap.set(log.device_id, log.total_usage);
-            }
+      // Since logs are ordered by timestamp desc, the first occurrence is the latest
+      for (const log of latestLogs) {
+        if (!deviceTotalUsageMap.has(log.device_id)) {
+          deviceTotalUsageMap.set(log.device_id, log.total_usage);
         }
+      }
     }
 
+    // Group history by room
+    const historyByRoom = new Map<number, Map<string, number>>(); // room_id -> (date -> usage)
+
+    historyData?.forEach(row => {
+      const device = devicesData.find(d => d.id === row.device_id);
+      if (device) {
+        if (!historyByRoom.has(device.room_id)) {
+          historyByRoom.set(device.room_id, new Map());
+        }
+        const roomHistory = historyByRoom.get(device.room_id)!;
+        const current = roomHistory.get(row.date) || 0;
+        roomHistory.set(row.date, current + row.daily_usage);
+      }
+    });
+
+    // NEW: Fetch active alerts to determine room status
+    const { data: alertsData } = await supabase
+      .from('alerts')
+      .select('room_id')
+      .eq('status', 'Active');
+
+    const leakingRoomIds = new Set(alertsData?.map(a => a.room_id) || []);
 
     const processedRooms: Room[] = roomsData.map(room => {
-        const devicesInRoom = devicesData.filter(d => d.room_id === room.id);
-        
-        const dailyUsage = devicesInRoom.reduce((acc, device) => {
-            return acc + (deviceDailyUsageMap.get(device.id) || 0);
-        }, 0);
+      const devicesInRoom = devicesData.filter(d => d.room_id === room.id);
 
-        const totalUsage = devicesInRoom.reduce((acc, device) => {
-            return acc + (deviceTotalUsageMap.get(device.id) || 0);
-        }, 0);
+      const dailyUsage = devicesInRoom.reduce((acc, device) => {
+        return acc + (deviceDailyUsageMap.get(device.id) || 0);
+      }, 0);
 
-        return {
-            id: room.id,
-            room_number: room.room_number,
-            daily_usage: dailyUsage,
-            total_usage: totalUsage,
-            status: 'OK' // Leak detection logic would need a query on water_usage_logs
-        }
+      const totalUsage = devicesInRoom.reduce((acc, device) => {
+        return acc + (deviceTotalUsageMap.get(device.id) || 0);
+      }, 0);
+
+      // Flatten history map to array
+      const roomHistoryMap = historyByRoom.get(room.id) || new Map();
+      const history = Array.from(roomHistoryMap.entries()).map(([date, usage]) => ({ date, usage }));
+
+      const buildingName = (room.buildings as any)?.name || 'Unknown';
+
+      return {
+        id: room.id,
+        room_number: `${buildingName} - ${room.room_number}`,
+        daily_usage: dailyUsage,
+        total_usage: totalUsage,
+        status: leakingRoomIds.has(room.id) ? 'Leak Detected' : 'OK',
+        history
+      }
     });
 
     setRooms(processedRooms);
     setLoading(false);
+
   };
-  
+
   useEffect(() => {
     fetchRooms();
 
@@ -152,15 +194,23 @@ export default function RoomsPage() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'daily_usage_summary' },
-        () => fetchRooms()
+        (payload) => {
+          console.log('Rooms: Realtime update (daily_usage_summary):', payload);
+          fetchRooms();
+        }
       )
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'water_usage_logs' },
-        () => fetchRooms()
+        (payload) => {
+          console.log('Rooms: Realtime update (water_usage_logs):', payload);
+          fetchRooms();
+        }
       )
-      .subscribe();
-      
+      .subscribe((status) => {
+        console.log('Rooms: Realtime subscription status:', status);
+      });
+
     // Cleanup subscription on component unmount
     return () => {
       supabase.removeChannel(channel);
@@ -213,21 +263,21 @@ export default function RoomsPage() {
       </div>
 
       {loading ? (
-         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-            {[...Array(3)].map((_, i) => (
-                <Card key={i} className="elevated-card">
-                    <CardHeader>
-                        <Skeleton className="h-6 w-1/2" />
-                        <Skeleton className="h-4 w-3/4" />
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <Skeleton className="h-12 w-full" />
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-10 w-full" />
-                    </CardContent>
-                </Card>
-            ))}
-         </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+          {[...Array(3)].map((_, i) => (
+            <Card key={i} className="elevated-card">
+              <CardHeader>
+                <Skeleton className="h-6 w-1/2" />
+                <Skeleton className="h-4 w-3/4" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
           {filteredRooms.map((room) => (
@@ -268,7 +318,11 @@ export default function RoomsPage() {
                     </AccordionTrigger>
                     <AccordionContent>
                       <div className="relative h-48 w-full">
-                        <p className="text-muted-foreground text-center text-sm">Historical data not yet available from database.</p>
+                        {room.history && room.history.length > 0 ? (
+                          <OptimizedLineChart data={room.history} dataKey="usage" />
+                        ) : (
+                          <p className="text-muted-foreground text-center text-sm pt-20">No data available.</p>
+                        )}
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -299,4 +353,3 @@ export default function RoomsPage() {
   );
 }
 
-    
